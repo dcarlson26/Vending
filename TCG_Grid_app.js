@@ -219,10 +219,10 @@ async function saveTransaction(){
     const transactionType = getTransactionType();
 
     const cashPaid =
-        parseInt(document.getElementById("cashOut").value) || 0;
+        parseInt(document.getElementById("cashPaid").value) || 0;
 
     const cashReceived =
-        parseInt(document.getElementById("cashIn").value) || 0;
+        parseInt(document.getElementById("cashReceived").value) || 0;
 
     const items = selectedCards.map(card => ({
     product_id: card.id,
@@ -233,8 +233,8 @@ async function saveTransaction(){
 
     const transaction = {
     transaction_type: transactionType,
-    cash_in: cashReceived,
-    cash_out: cashPaid,
+    cashReceived: cashReceived,
+    cashPaid: cashPaid,
     items: items
     };
 
@@ -297,7 +297,7 @@ document.getElementById("search").addEventListener("keydown", (e) => {
 });
 
 document.getElementById("searchBtn").addEventListener("click", runSearch);
-
+document.getElementById("saveTransactionButton").addEventListener("click", saveTransaction);
 //document.getElementById("clearBtn").addEventListener("click", clearAll);
 
 // init
