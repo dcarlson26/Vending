@@ -95,9 +95,13 @@ function addCard(id, name, price) {
 
     if (!selectedCards[id]) {
         selectedCards[id] = {
-            name,
+            name: name,
             price: priceNum,
-            qty: 0
+            product_id: id,
+            qty: 0,
+            condition: "NM",
+
+            notes: ""
         };
     }
 
@@ -224,12 +228,22 @@ async function saveTransaction(){
     const cashReceived =
         parseInt(document.getElementById("cashReceived").value) || 0;
 
-    const items = selectedCards.map(card => ({
-    product_id: card.id,
-    condition: "NM",      // temporary
-    value: Number(card.price),
-    notes: null
-    }));
+    /* for (const id in selectedCards) {
+        const card = selectedCards[id]; */
+    const items = Object.entries(selectedCards).flatMap(([productId, card]) => {
+        const cards = [];
+
+        for (let i = 0; i < card.qty; i++) {
+            cards.push({
+                product_id: Number(productId),
+                condition: "NM",      // temporary
+                value: card.price,
+                notes: null
+            });
+        }
+
+        return cards;
+    });
 
     const transaction = {
     transaction_type: transactionType,
