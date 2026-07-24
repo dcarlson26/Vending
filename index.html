@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Card Search</title>
+    <style>
+        body { font-family: Arial; }
+        input {
+            padding: 8px;
+            font-size: 16px;
+        }
+
+        button {
+            padding: 8px 12px;
+            font-size: 16px;
+            margin-left: 5px;
+        }
+        .card {
+            border: 1px solid #ccc;
+            padding: 10px;
+            background: white;
+            text-align: center;
+            border-radius: 8px;
+        }
+        img { height: 100px; }
+        #results {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 12px;
+            padding: 10px;
+        }
+        .card img {
+            width: 100%;
+            height: auto;
+            border-radius: 4px;
+            max-height: 150px;
+            object-fit: contain;
+        }
+        .card:hover {
+            transform: scale(1.02);
+            transition: transform 0.1s;
+        }
+        #cart {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            width: 260px;
+            max-height: 80vh;
+            overflow-y: auto;
+
+            background: white;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            padding: 10px;
+
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            z-index: 1000;
+            box-sizing: border-box;
+        }
+
+        #selectedList {
+            margin-top: 10px;
+        }
+
+        .cart-item {
+            display: flex;
+            justify-content: space-between; /* pushes left/right apart */
+            align-items: center;
+            gap: 8px;
+
+            border-bottom: 1px solid #eee;
+            padding: 6px 0;
+            font-size: 14px;
+        }
+
+        .cart-text {
+            flex: 1;
+            min-width: 0;          
+            white-space: normal;        
+            word-break: break-word;     
+        }
+
+        .cart-actions {
+            display: flex;
+            gap: 4px;
+        }
+        .cart-actions button {
+            flex-shrink: 0;
+        }
+        .card-name {
+            font-weight: bold;
+        }
+        
+        .card-meta {
+            font-size: 13px;
+            opacity: 0.8;
+        }
+        @media (max-width: 600px) {
+            body {
+                padding-bottom: 45vh; /* adjust to cart height */
+            }
+            #cart {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0 !important;
+                top: auto !important;
+                
+                width: 100%;
+                max-height: 40vh;
+
+                border-radius: 12px 12px 0 0;
+                border-top: 1px solid #ccc;
+
+                overflow-y: auto;
+                z-index: 1000;
+            }
+            #results {
+                display: flex !important;
+                flex-direction: column;
+                gap: 10px;
+            }
+            .card {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+        }
+        @media (prefers-color-scheme: dark) {
+            body {
+                background-color: #121212;
+                color: #ffffff;
+            }
+
+            .card {
+                background-color: #1e1e1e;
+                border: 1px solid #444;
+            }
+
+            input, button {
+                background-color: #2a2a2a;
+                color: #ffffff;
+                border: 1px solid #555;
+            }
+            #cart {
+                background-color: #1e1e1e;
+                color: #ffffff;
+                border: 1px solid #444;
+            }
+
+            .cart-item {
+                border-bottom: 1px solid #444;
+            }
+
+            button {
+                background-color: #2a2a2a;
+                color: #ffffff;
+                border: 1px solid #555;
+            }
+            .set-name {color: #bbb;}
+        }
+    </style>
+</head>
+<body>
+
+<h2>Pokemon card trade</h2>
+<input type="text" id="search" placeholder="Search..." />
+<button id="searchBtn">Search</button>
+<div id="cart">
+    <h3>Selected Cards</h3>
+
+    <div id="totals"></div>
+
+    <div id="selectedList"></div>
+
+    <button onclick="clearAll()">Clear All</button>
+</div>
+<!--<button id="clearBtn">Clear All</button>-->
+<div id="results">Type and press Enter to search</div>
+
+<script src="TCG_Grid_app.js"></script>
+
+</body>
+</html>
