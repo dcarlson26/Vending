@@ -215,7 +215,7 @@ function renderSelectedCards() {
     }
 }
 
-function saveTransaction(){
+async function saveTransaction(){
     const transactionType = getTransactionType();
 
     const cashPaid =
