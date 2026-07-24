@@ -215,6 +215,45 @@ function renderSelectedCards() {
     }
 }
 
+function saveTransaction(){
+    const transactionType = getTransactionType();
+
+    const cashPaid =
+        parseInt(document.getElementById("cashOut").value) || 0;
+
+    const cashReceived =
+        parseInt(document.getElementById("cashIn").value) || 0;
+
+    const items = selectedCards.map(card => ({
+    product_id: card.id,
+    condition: "NM",      // temporary
+    value: Number(card.price),
+    notes: null
+    }));
+
+    const transaction = {
+    transaction_type: transactionType,
+    cash_in: cashReceived,
+    cash_out: cashPaid,
+    items: items
+    };
+
+    const response = await fetch("/api/transactions", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(transaction)
+    });
+
+    if (response.ok) {
+        alert("Transaction saved!");
+    }
+    else {
+        alert("Failed to save transaction.");
+    }
+}
+
 function updateTransactionUI() {
 
     const type = document.querySelector(
