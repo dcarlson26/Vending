@@ -84,7 +84,11 @@ function render(results) {
         container.appendChild(div);
     });
 }
-
+function getTransactionType() {
+    return document.querySelector(
+        'input[name="transactionType"]:checked'
+    ).value;
+}
 function addCard(id, name, price) {
     const priceNum = parseFloat(price);
     if (isNaN(priceNum)) return;
@@ -211,6 +215,42 @@ function renderSelectedCards() {
     }
 }
 
+function updateTransactionUI() {
+
+    const type = document.querySelector(
+        'input[name="transactionType"]:checked'
+    ).value;
+
+    const cashReceivedRow = document.getElementById("cashReceivedRow");
+    const cashPaidRow = document.getElementById("cashPaidRow");
+    const button = document.getElementById("saveTransactionButton");
+
+    if (type === "BUY") {
+
+        cashReceivedRow.style.display = "none";
+        cashPaidRow.style.display = "block";
+
+        button.textContent = "Save Purchase";
+
+    }
+    else if (type === "SELL") {
+
+        cashReceivedRow.style.display = "block";
+        cashPaidRow.style.display = "none";
+
+        button.textContent = "Save Sale";
+
+    }
+    else {
+
+        cashReceivedRow.style.display = "block";
+        cashPaidRow.style.display = "block";
+
+        button.textContent = "Save Trade";
+
+    }
+}
+
 document.getElementById("search").addEventListener("keydown", (e) => {
     if (e.key === "Enter") {
         runSearch();
@@ -222,8 +262,7 @@ document.getElementById("searchBtn").addEventListener("click", runSearch);
 //document.getElementById("clearBtn").addEventListener("click", clearAll);
 
 // init
-loadData();
-
-window.onload = () => {
-    document.getElementById("search").focus();
-};
+window.onload = function () {
+    updateTransactionUI();
+    loadData();
+}

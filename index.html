@@ -161,6 +161,47 @@
     </style>
 </head>
 <body>
+    
+<div id="transactionControls">
+    <strong>Transaction Type</strong><br>
+
+    <label>
+        <input
+            type="radio"
+            name="transactionType"
+            value="BUY"
+            checked
+            onchange="updateTransactionUI()">
+    </label>
+
+    <label>
+        <input
+            type="radio"
+            name="transactionType"
+            value="SELL"
+            checked
+            onchange="updateTransactionUI()">
+    </label>
+
+    <label>
+        <input
+            type="radio"
+            name="transactionType"
+            value="TRADE"
+            checked
+            onchange="updateTransactionUI()">
+    </label>
+
+    <div id="cashReceivedRow" style="display:none;">
+        Cash Received:
+        <input type="number" id="cashReceived" min="0" step="1" value="0">
+    </div>
+
+    <div id="cashPaidRow">
+        Cash Paid:
+        <input type="number" id="cashPaid" min="0" step="1" value="0">
+    </div>
+</div>
 
 <h2>Pokemon card trade</h2>
 <input type="text" id="search" placeholder="Search..." />
@@ -176,6 +217,11 @@
 </div>
 <!--<button id="clearBtn">Clear All</button>-->
 <div id="results">Type and press Enter to search</div>
+
+<button id="saveTransactionButton"
+        onclick="saveTransaction()">
+    Save Purchase
+</button>
 
 <script src="TCG_Grid_app.js"></script>
 
