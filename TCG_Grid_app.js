@@ -251,8 +251,9 @@ async function saveTransaction(){
     cashPaid: cashPaid,
     items: items
     };
-
-    const response = await fetch("/api/transactions", {
+    //uncomment this and replace local host once we have the fastAPI in place
+    //const response = await fetch("/api/transactions", {
+    const response = await fetch("http://localhost:8000/api/transactions", {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
