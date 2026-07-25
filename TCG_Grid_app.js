@@ -221,13 +221,15 @@ function renderSelectedCards() {
 
 async function saveTransaction(){
     const transactionType = getTransactionType();
+    const cash_paid =
+        parseInt(document.getElementById("cash_paid").value) || 0;
 
-    const cashPaid =
-        parseInt(document.getElementById("cashPaid").value) || 0;
-
-    const cashReceived =
-        parseInt(document.getElementById("cashReceived").value) || 0;
-
+    const cash_received =
+        parseInt(document.getElementById("cash_received").value) || 0;
+    const direction =
+    transactionType === "BUY" ? "IN" :
+    transactionType === "SELL" ? "OUT" :
+    null;
     /* for (const id in selectedCards) {
         const card = selectedCards[id]; */
     const items = Object.entries(selectedCards).flatMap(([productId, card]) => {
@@ -236,6 +238,7 @@ async function saveTransaction(){
         for (let i = 0; i < card.qty; i++) {
             cards.push({
                 product_id: Number(productId),
+                direction: direction, //needs to be smarter
                 condition: "NM",      // temporary
                 value: card.price,
                 notes: null
@@ -247,10 +250,11 @@ async function saveTransaction(){
 
     const transaction = {
     transaction_type: transactionType,
-    cashReceived: cashReceived,
-    cashPaid: cashPaid,
+    cash_received: cash_received,
+    cash_paid: cash_paid,
     items: items
     };
+
     //uncomment this and replace local host once we have the fastAPI in place
     //const response = await fetch("/api/transactions", {
     const response = await fetch("http://localhost:8000/api/transactions", {
@@ -275,30 +279,30 @@ function updateTransactionUI() {
         'input[name="transactionType"]:checked'
     ).value;
 
-    const cashReceivedRow = document.getElementById("cashReceivedRow");
-    const cashPaidRow = document.getElementById("cashPaidRow");
+    const cash_received_row = document.getElementById("cash_received_row");
+    const cash_paid_row = document.getElementById("cash_paid_row");
     const button = document.getElementById("saveTransactionButton");
 
     if (type === "BUY") {
 
-        cashReceivedRow.style.display = "none";
-        cashPaidRow.style.display = "block";
+        cash_received_row.style.display = "none";
+        cash_paid_row.style.display = "block";
 
         button.textContent = "Save Purchase";
 
     }
     else if (type === "SELL") {
 
-        cashReceivedRow.style.display = "block";
-        cashPaidRow.style.display = "none";
+        cash_received_row.style.display = "block";
+        cash_paid_row.style.display = "none";
 
         button.textContent = "Save Sale";
 
     }
     else {
 
-        cashReceivedRow.style.display = "block";
-        cashPaidRow.style.display = "block";
+        cash_received_row.style.display = "block";
+        cash_paid_row.style.display = "block";
 
         button.textContent = "Save Trade";
 
