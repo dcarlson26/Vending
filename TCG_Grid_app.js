@@ -84,24 +84,16 @@ function render(results) {
         container.appendChild(div);
     });
 }
-function getTransactionType() {
-    return document.querySelector(
-        'input[name="transactionType"]:checked'
-    ).value;
-}
+
 function addCard(id, name, price) {
     const priceNum = parseFloat(price);
     if (isNaN(priceNum)) return;
 
     if (!selectedCards[id]) {
         selectedCards[id] = {
-            name: name,
+            name,
             price: priceNum,
-            product_id: id,
-            qty: 0,
-            condition: "NM",
-
-            notes: ""
+            qty: 0
         };
     }
 
@@ -219,96 +211,6 @@ function renderSelectedCards() {
     }
 }
 
-async function saveTransaction(){
-    const transactionType = getTransactionType();
-    const cash_paid =
-        parseInt(document.getElementById("cash_paid").value) || 0;
-
-    const cash_received =
-        parseInt(document.getElementById("cash_received").value) || 0;
-    const direction =
-    transactionType === "BUY" ? "IN" :
-    transactionType === "SELL" ? "OUT" :
-    null;
-    /* for (const id in selectedCards) {
-        const card = selectedCards[id]; */
-    const items = Object.entries(selectedCards).flatMap(([productId, card]) => {
-        const cards = [];
-
-        for (let i = 0; i < card.qty; i++) {
-            cards.push({
-                product_id: Number(productId),
-                direction: direction, //needs to be smarter
-                condition: "NM",      // temporary
-                value: card.price,
-                notes: null
-            });
-        }
-
-        return cards;
-    });
-
-    const transaction = {
-    transaction_type: transactionType,
-    cash_received: cash_received,
-    cash_paid: cash_paid,
-    items: items
-    };
-
-    //uncomment this and replace local host once we have the fastAPI in place
-    //const response = await fetch("/api/transactions", {
-    const response = await fetch("http://localhost:8000/api/transactions", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify(transaction)
-    });
-
-    if (response.ok) {
-        alert("Transaction saved!");
-    }
-    else {
-        alert("Failed to save transaction.");
-    }
-}
-
-function updateTransactionUI() {
-
-    const type = document.querySelector(
-        'input[name="transactionType"]:checked'
-    ).value;
-
-    const cash_received_row = document.getElementById("cash_received_row");
-    const cash_paid_row = document.getElementById("cash_paid_row");
-    const button = document.getElementById("saveTransactionButton");
-
-    if (type === "BUY") {
-
-        cash_received_row.style.display = "none";
-        cash_paid_row.style.display = "block";
-
-        button.textContent = "Save Purchase";
-
-    }
-    else if (type === "SELL") {
-
-        cash_received_row.style.display = "block";
-        cash_paid_row.style.display = "none";
-
-        button.textContent = "Save Sale";
-
-    }
-    else {
-
-        cash_received_row.style.display = "block";
-        cash_paid_row.style.display = "block";
-
-        button.textContent = "Save Trade";
-
-    }
-}
-
 document.getElementById("search").addEventListener("keydown", (e) => {
     if (e.key === "Enter") {
         runSearch();
@@ -316,11 +218,12 @@ document.getElementById("search").addEventListener("keydown", (e) => {
 });
 
 document.getElementById("searchBtn").addEventListener("click", runSearch);
-document.getElementById("saveTransactionButton").addEventListener("click", saveTransaction);
+
 //document.getElementById("clearBtn").addEventListener("click", clearAll);
 
 // init
-window.onload = function () {
-    updateTransactionUI();
-    loadData();
-}
+loadData();
+
+window.onload = () => {
+    document.getElementById("search").focus();
+};

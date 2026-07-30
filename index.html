@@ -162,50 +162,22 @@
 </head>
 <body>
     
-<div id="transactionControls">
-    <strong>Transaction Type</strong><br>
+<label>
+    <input type="radio" name="transactionType" value="BUY" checked>
+    Buy
+</label>
 
-    <label>
-        <input
-            type="radio"
-            name="transactionType"
-            value="BUY"
-            checked
-            onchange="updateTransactionUI()">
-        Buy
-    </label>
+<label>
+    <input type="radio" name="transactionType" value="SELL">
+    Sell
+</label>
 
-    <label>
-        <input
-            type="radio"
-            name="transactionType"
-            value="SELL"
-            onchange="updateTransactionUI()">
-        Sell
-    </label>
-
-    <label>
-        <input
-            type="radio"
-            name="transactionType"
-            value="TRADE"
-            onchange="updateTransactionUI()">
-        Trade
-    </label>
-
-    <div id="cash_received_row" style="display:none;">
-        Cash Received:
-        <input type="number" id="cash_received" min="0" step="1" value="0">
-    </div>
-
-    <div id="cash_paid_row">
-        Cash Paid:
-        <input type="number" id="cash_paid" min="0" step="1" value="0">
-    </div>
-</div>
-
-<button id="saveTransactionButton">Save Transaction</button>
-
+<label>
+    <input type="radio" name="transactionType" value="TRADE">
+    Trade
+</label>
+<button id="inventoryButton">Inventory</button>
+<h2>Pokemon card trade</h2>
 <input type="text" id="search" placeholder="Search..." />
 <button id="searchBtn">Search</button>
 <div id="cart">

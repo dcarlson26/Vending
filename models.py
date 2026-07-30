@@ -38,9 +38,9 @@ class Transaction(BaseModel):
     transaction_type: TransactionType
 
     transaction_date: str | None = None
-    cash_received: float = 0
+    cash_in: float = 0
 
-    cash_paid: float = 0
+    cash_out: float = 0
 
     notes: str | None = None
 
