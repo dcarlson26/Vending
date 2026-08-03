@@ -2,15 +2,26 @@ from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
+from fastapi.middleware.cors import CORSMiddleware
 from backend.database import initialize_database
 from backend.models import Transaction
 from backend.database import save_transaction
 from backend.database import get_cards
 from backend.database import get_inventory_values
 
+
 initialize_database()
 app = FastAPI()
-
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://127.0.0.1:8000",
+        "http://localhost:8000",
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 @app.post("/api/transactions")
 def save(transaction: Transaction):
 

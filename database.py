@@ -47,9 +47,9 @@ def initialize_database():
 
             transaction_date TEXT NOT NULL,
 
-            cash_in REAL DEFAULT 0,
+            cash_received REAL DEFAULT 0,
 
-            cash_out REAL DEFAULT 0,
+            cash_paid REAL DEFAULT 0,
 
             notes TEXT
         );
@@ -115,8 +115,8 @@ def create_card(
 def create_transaction(
     transaction_type,
     transaction_date,
-    cash_in=0,
-    cash_out=0,
+    cash_received=0,
+    cash_paid=0,
     notes=None,
     conn=None,
 ):
@@ -126,8 +126,8 @@ def create_transaction(
         (
             transaction_type,
             transaction_date,
-            cash_in,
-            cash_out,
+            cash_received,
+            cash_paid,
             notes
         )
         VALUES (?, ?, ?, ?, ?)
@@ -135,8 +135,8 @@ def create_transaction(
         (
             transaction_type,
             transaction_date,
-            cash_in,
-            cash_out,
+            cash_received,
+            cash_paid,
             notes,
         ),
     )
@@ -186,7 +186,13 @@ def add_transaction_item(
 def save_transaction(transaction):
     conn = get_connection()
     from datetime import date
+    from fastapi import HTTPException
 
+    if len(transaction.items) == 0:
+        raise HTTPException(
+            status_code=400,
+            detail="Transaction must contain at least one card."
+        )
     if transaction.transaction_date is None:
         transaction.transaction_date = date.today().isoformat()
     try:
@@ -196,8 +202,8 @@ def save_transaction(transaction):
         transaction_id = create_transaction(
             transaction.transaction_type,
             transaction.transaction_date,
-            transaction.cash_in,
-            transaction.cash_out,
+            transaction.cash_received,
+            transaction.cash_paid,
             transaction.notes,
             conn
         )
@@ -254,8 +260,8 @@ def get_inventory_values():
 
             t.transaction_type,
             t.transaction_date,
-            t.cash_in,
-            t.cash_out
+            t.cash_received,
+            t.cash_paid
 
         FROM cards c
 

@@ -36,10 +36,6 @@
             max-height: 150px;
             object-fit: contain;
         }
-        .card:hover {
-            transform: scale(1.02);
-            transition: transform 0.1s;
-        }
         #cart {
             position: fixed;
             top: 10px;
@@ -95,6 +91,89 @@
             font-size: 13px;
             opacity: 0.8;
         }
+
+        #tabs {
+            display: flex;
+            margin-bottom: 10px;
+        }
+
+        #tabs button {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #555;
+            cursor: pointer;
+        }
+
+        #tabs button.activeTab {
+            font-weight: bold;
+            border-bottom: none;
+        }
+        #inventoryTable {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        #inventoryTable th,
+        #inventoryTable td {
+            border: 1px solid #ccc;
+            padding: 8px;
+        }
+
+        #inventoryTable th {
+            background: #eee;
+            text-align: left;
+        }
+
+        #inventoryTable td:nth-child(n+4) {
+            text-align: right;
+        }
+        #transactionPanel {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+
+        max-height: 45vh;
+        overflow-y: auto;
+
+        background: white;
+        border-top: 2px solid #ccc;
+        }
+
+        .segmented-control {
+            display: flex;
+            width: 100%;
+            max-width: 450px;
+            margin: 10px auto;
+            border: 1px solid #888;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .segmented-control label {
+            flex: 1;
+            text-align: center;
+            cursor: pointer;
+        }
+
+        .segmented-control input {
+            display: none;
+        }
+
+        .segmented-control span {
+            display: block;
+            padding: 10px 12px;
+        }
+
+        .segmented-control input:checked + span {
+            background: #555;
+            color: white;
+        }
+
+        .segmented-control label:not(:last-child) span {
+            border-right: 1px solid #888;
+        }
+
         @media (max-width: 600px) {
             body {
                 padding-bottom: 45vh; /* adjust to cart height */
@@ -156,42 +235,146 @@
                 color: #ffffff;
                 border: 1px solid #555;
             }
+            #transactionPanel {
+                background: #2a2a2a;
+                border-top: 2px solid #555;
+            }
+            #transactionFooter {
+                border-top: 1px solid #888;
+                padding: 12px;
+                margin-top: 8px;
+            }
+
+            #totals {
+                display: grid;
+                gap: 4px;
+                margin-bottom: 12px;
+            }
+
+            #saveTransactionButton {
+                width: 100%;
+                padding: 10px;
+                font-size: 1rem;
+                border-radius: 6px;
+                cursor: pointer;
+            }
             .set-name {color: #bbb;}
         }
     </style>
 </head>
 <body>
-    
-<label>
-    <input type="radio" name="transactionType" value="BUY" checked>
-    Buy
-</label>
 
-<label>
-    <input type="radio" name="transactionType" value="SELL">
-    Sell
-</label>
+<div id="tabs">
+    <button id="searchTab" class="activeTab">
+        Search
+    </button>
 
-<label>
-    <input type="radio" name="transactionType" value="TRADE">
-    Trade
-</label>
-<button id="inventoryButton">Inventory</button>
-<h2>Pokemon card trade</h2>
-<input type="text" id="search" placeholder="Search..." />
-<button id="searchBtn">Search</button>
-<div id="cart">
-    <h3>Selected Cards</h3>
-
-    <div id="totals"></div>
-
-    <div id="selectedList"></div>
-
-    <button onclick="clearAll()">Clear All</button>
+    <button id="inventoryTab">
+        Inventory
+    </button>
 </div>
-<!--<button id="clearBtn">Clear All</button>-->
-<div id="results">Type and press Enter to search</div>
 
+<div id="searchView">
+
+    <div id="transactionTypeControl" class="segmented-control">
+
+        <label>
+            <input
+                type="radio"
+                name="transactionType"
+                value="BUY"
+                checked
+                onchange="updateTransactionUI()">
+            <span>Buy</span>
+        </label>
+
+        <label>
+            <input
+                type="radio"
+                name="transactionType"
+                value="SELL"
+                onchange="updateTransactionUI()">
+            <span>Sell</span>
+        </label>
+
+        <label>
+            <input
+                type="radio"
+                name="transactionType"
+                value="TRADE"
+                onchange="updateTransactionUI()">
+            <span>Trade</span>
+        </label>
+
+    </div>
+
+        <div id="cash_received_row" style="display:none;">
+            Cash Received:
+            <input type="number" id="cash_received" min="0" step="1" value="0">
+        </div>
+
+        <div id="cash_paid_row">
+            Cash Paid:
+            <input type="number" id="cash_paid" min="0" step="1" value="0">
+        </div>
+    </div>
+
+    <input type="text" id="search" placeholder="Search..." />
+
+    <button id="searchBtn">Search</button>
+    <div id="searchResults"></div>
+    <div id="transactionPanel">
+        <div id="transactionHeader">
+            <strong>Transaction</strong>
+        </div>
+
+        <div id="incomingPanel">
+            <h3>Incoming Cards</h3>
+            <div id="incomingCards"></div>
+        </div>
+
+        <div id="outgoingPanel">
+            <h3>Outgoing Cards</h3>
+            <div id="outgoingCards"></div>
+        </div>
+        <div id="transactionFooter">
+
+            <div id="totals">
+            </div>
+
+            <button id="saveTransactionButton">
+                Save Transaction
+            </button>
+
+        </div>
+    </div>
+    
+</div>
+
+<div id="inventoryView" style="display:none;">
+
+    <h2>Inventory</h2>
+
+    <table id="inventoryTable">
+        <thead>
+            <tr>
+                <th>Card</th>
+                <th>Set</th>
+                <th>Condition</th>
+                <th>Market (now)</th>
+                <th>Paid</th>
+                <th>Profit</th>
+                <th>Market (then)</th>
+            </tr>
+        </thead>
+
+        <tbody id="inventoryBody">
+        </tbody>
+    </table>
+
+</div>
+
+<!--<button id="clearBtn">Clear All</button>-->
 <script src="TCG_Grid_app.js"></script>
 
 </body>
