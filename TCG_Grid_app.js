@@ -522,16 +522,20 @@ async function saveTransaction(){
     clearTransaction();
 }
 async function loadInventory() {
-
-    document.getElementById("searchView").style.display = "none";
-    document.getElementById("inventoryView").style.display = "";
-    document.getElementById("searchTab").classList.remove("activeTab");
-    document.getElementById("inventoryTab").classList.add("activeTab");
+    showInventory();
 
     const response = await fetch("/api/inventory");
     const inventory = await response.json();
 
     renderInventory(inventory);
+}
+function showInventory() {
+    document.getElementById("transactionsView").style.display = "none";
+    document.getElementById("searchView").style.display = "none";
+    document.getElementById("inventoryView").style.display = "";
+    document.getElementById("searchTab").classList.remove("activeTab");
+    document.getElementById("transactionTab").classList.remove("activeTab");
+    document.getElementById("inventoryTab").classList.add("activeTab");
 }
 
 function renderInventory(inventory) {
@@ -595,10 +599,203 @@ function showSearch() {
 
     document.getElementById("inventoryView").style.display = "none";
     document.getElementById("searchView").style.display = "";
+    document.getElementById("transactionsView").style.display = "none";
 
     document.getElementById("inventoryTab").classList.remove("activeTab");
     document.getElementById("searchTab").classList.add("activeTab");
+    document.getElementById("transactionTab").classList.remove("activeTab");
+
 }
+
+async function loadTransactions() {
+    const startDate =
+        document.getElementById("transactionStartDate").value;
+
+    const endDate =
+        document.getElementById("transactionEndDate").value;
+
+    if (!startDate || !endDate) {
+        alert("Please select both dates.");
+        return;
+    }
+    if (startDate > endDate) {
+        alert("Start date cannot be after end date.");
+        return;
+    }
+    const response = await fetch(
+        `http://localhost:8000/api/transactions?start_date=${startDate}&end_date=${endDate}`
+    );
+
+    if (!response.ok) {
+        console.error("Failed to load transactions");
+        return;
+    }
+
+    const transactions = await response.json();
+
+    console.log("Transactions:", transactions);
+
+    renderTransactions(transactions);
+}
+function renderTransactions(transactions) {
+    const container = document.getElementById("transactionResults");
+    const summary = document.getElementById("transactionSummary");
+
+    container.innerHTML = "";
+    summary.innerHTML = "";
+
+    if (transactions.length === 0) {
+        container.textContent = "No transactions found.";
+        return;
+    }
+
+    transactions.forEach(transaction => {
+        const wrapper = document.createElement("div");
+        wrapper.className = "transaction-entry";
+
+        const header = document.createElement("button");
+        header.className = "transaction-header";
+
+        const cashText =
+            transaction.cash_received > 0
+                ? `Cash received: $${transaction.cash_received.toFixed(2)}`
+                : transaction.cash_paid > 0
+                    ? `Cash paid: $${transaction.cash_paid.toFixed(2)}`
+                    : "No cash";
+
+        header.innerHTML = `
+            <span>
+                <strong>${transaction.transaction_type}</strong>
+                &nbsp; ${transaction.transaction_date}
+            </span>
+
+            <span>
+                ${cashText} &nbsp; ▼
+            </span>
+        `;
+
+        const details = document.createElement("div");
+        details.className = "transaction-details";
+        details.style.display = "none";
+
+        transaction.items.forEach(item => {
+            const product = products.find(
+                p => Number(p.product_id) === Number(item.product_id)
+            );
+
+            const itemDiv = document.createElement("div");
+            itemDiv.className = "transaction-item";
+
+            itemDiv.innerHTML = `
+                <strong>
+                    ${product ? product.name : `Unknown card (${item.product_id})`}
+                </strong>
+
+                <div>
+                    ${item.direction}
+                    | Market: $${Number(item.market_value).toFixed(2)}
+                    | Value: $${Number(item.value).toFixed(2)}
+                </div>
+            `;
+
+            details.appendChild(itemDiv);
+        });
+
+        header.addEventListener("click", () => {
+            const isHidden = details.style.display === "none";
+
+            details.style.display = isHidden ? "block" : "none";
+
+            // Change arrow
+            header.innerHTML = `
+                <span>
+                    <strong>${transaction.transaction_type}</strong>
+                    &nbsp; ${transaction.transaction_date}
+                </span>
+
+                <span>
+                    ${cashText} &nbsp; ${isHidden ? "▲" : "▼"}
+                </span>
+            `;
+        });
+
+        wrapper.appendChild(header);
+        wrapper.appendChild(details);
+
+        container.appendChild(wrapper);
+    });
+    renderTransactionSummary(transactions);
+}
+function showTransactions() {
+    document.getElementById("searchView").style.display = "none";
+    document.getElementById("inventoryView").style.display = "none";
+    document.getElementById("transactionsView").style.display = "block";
+
+    document.getElementById("inventoryTab").classList.remove("activeTab");
+    document.getElementById("searchTab").classList.remove("activeTab");
+    document.getElementById("transactionTab").classList.add("activeTab");
+
+}
+function renderTransactionSummary(transactions){
+    let sales = 0;
+    let inventoryAdded = 0;
+    let cashPaidForInventory = 0;
+    let tradeCashReceived = 0;
+    let tradeCashPaid = 0;
+
+    for (const transaction of transactions) {
+
+        // Actual cash received from selling cards
+        if (transaction.transaction_type === "SELL") {
+            sales += Number(transaction.cash_received);
+        }
+
+        // Actual cash paid/received as part of trades
+        if (transaction.transaction_type === "TRADE") {
+            tradeCashReceived += Number(transaction.cash_received);
+            tradeCashPaid += Number(transaction.cash_paid);
+        }
+
+        // Inventory that came IN
+        for (const item of transaction.items) {
+            if (item.direction === "IN") {
+                inventoryAdded += Number(item.market_value);
+            }
+        }
+
+        // Cash paid on purchases
+        if (transaction.transaction_type === "BUY") {
+            cashPaidForInventory += Number(transaction.cash_paid);
+        }
+    }
+
+    const summary = document.getElementById("transactionSummary");
+
+    summary.innerHTML = `
+        <div class="transaction-summary">
+            <div class="summary-title">Show Summary</div>
+
+            <div class="summary-grid">
+                <div>Sales</div>
+                <div>$${sales.toFixed(2)}</div>
+
+                <div>Inventory Added (Market)</div>
+                <div>$${inventoryAdded.toFixed(2)}</div>
+
+                <div>Cash Paid for Inventory</div>
+                <div>$${cashPaidForInventory.toFixed(2)}</div>
+
+                <div>Trade Cash Received</div>
+                <div>$${tradeCashReceived.toFixed(2)}</div>
+
+                <div>Trade Cash Paid</div>
+                <div>$${tradeCashPaid.toFixed(2)}</div>
+            </div>
+        </div>
+    `;    
+}
+
+
 document.getElementById("search").addEventListener("keydown", (e) => {
     if (e.key === "Enter") {
         runSearch();
@@ -610,6 +807,25 @@ document.getElementById("inventoryTab").addEventListener("click", loadInventory)
 
 document.getElementById("searchTab").addEventListener("click", showSearch);
 document.getElementById("saveTransactionButton").addEventListener("click", saveTransaction);
+
+document.getElementById("transactionTab").addEventListener("click", showTransactions);
+document.getElementById("loadTransactionsButton").addEventListener("click", loadTransactions);
+
+const startDateInput = document.getElementById("transactionStartDate");
+const endDateInput = document.getElementById("transactionEndDate");
+
+startDateInput.addEventListener("change", () => {
+    if (!endDateInput.value) {
+        endDateInput.value = startDateInput.value;
+    }
+});
+
+endDateInput.addEventListener("change", () => {
+    if (!startDateInput.value) {
+        startDateInput.value = endDateInput.value;
+    }
+});
+
 //document.getElementById("clearBtn").addEventListener("click", clearAll);
 
 // init

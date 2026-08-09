@@ -223,6 +223,61 @@
             font-weight: bold;
             margin-top: 4px;
         }
+        .transaction-entry {
+            margin-bottom: 8px;
+            border: 1px solid #888;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .transaction-header {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            border: none;
+            cursor: pointer;
+            text-align: left;
+        }
+
+        .transaction-details {
+            padding: 10px 12px;
+            border-top: 1px solid #888;
+        }
+
+        .transaction-item {
+            padding: 8px 0;
+        }
+
+        .transaction-item + .transaction-item {
+            border-top: 1px solid #ccc;
+        }
+        .transaction-summary {
+            margin-top: 20px;
+            padding: 12px;
+            border: 1px solid #888;
+            border-radius: 6px;
+        }
+
+        .summary-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 6px 20px;
+        }
+
+        .summary-grid > div:nth-child(even) {
+            text-align: right;
+        }
+
+
+
+
 
         @media (max-width: 600px) {
             body {
@@ -325,6 +380,10 @@
     <button id="inventoryTab">
         Inventory
     </button>
+
+    <button id="transactionTab">
+        Transactions
+    </button>
 </div>
 
 <div id="searchView">
@@ -415,7 +474,34 @@
     </table>
 
 </div>
+<div id="transactionsView" style="display:none;">
 
+    <h2>Transactions</h2>
+
+    <div class="transaction-filters">
+        <label>
+            From:
+            <input type="date" id="transactionStartDate">
+        </label>
+
+        <label>
+            To:
+            <input type="date" id="transactionEndDate">
+        </label>
+
+        <button id="loadTransactionsButton">
+            Load
+        </button>
+    </div>
+
+    <div id="transactionResults">
+        Click the load button to load transactions
+    </div>
+
+    <div id="transactionSummary">
+    </div>
+
+</div>
 <!--<button id="clearBtn">Clear All</button>-->
 <script src="TCG_Grid_app.js"></script>
 
