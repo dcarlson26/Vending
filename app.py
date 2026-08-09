@@ -8,7 +8,7 @@ from backend.models import Transaction
 from backend.database import save_transaction
 from backend.database import get_cards
 from backend.database import get_inventory_values
-
+from backend.database import get_transactions_by_date
 
 initialize_database()
 app = FastAPI()
@@ -28,6 +28,7 @@ def save(transaction: Transaction):
     save_transaction(transaction)
 
     return {"success": True}
+
 @app.get("/api/cards")
 def get_cards_endpoint():
     return get_cards()
@@ -35,6 +36,13 @@ def get_cards_endpoint():
 @app.get("/api/inventory")
 def inventory():
     return get_inventory_values()
+
+@app.get("/api/transactions")
+def get_transactions(
+    start_date: str,
+    end_date: str
+):
+    return get_transactions_by_date(start_date, end_date)
 
 frontend_dir = Path(__file__).parent.parent / "frontend"
 

@@ -31,6 +31,7 @@ class TransactionItem(BaseModel):
     condition: cardCondition
     direction: Direction
     value: float
+    market_value: float
     notes: str | None = None
 
 class Transaction(BaseModel):

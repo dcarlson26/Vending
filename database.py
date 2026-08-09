@@ -66,6 +66,8 @@ def initialize_database():
 
             value REAL NOT NULL,
 
+            market_value REAL NOT NULL,
+
             FOREIGN KEY(transaction_id)
                 REFERENCES transactions(transaction_id),
 
@@ -155,6 +157,7 @@ def add_transaction_item(
     card_id,
     direction,
     value,
+    market_value,
     conn=None,
 ):
     owns_connection = conn is None
@@ -169,15 +172,17 @@ def add_transaction_item(
             transaction_id,
             card_id,
             direction,
-            value
+            value,
+            market_value
         )
-        VALUES (?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?)
         """,
         (
             transaction_id,
             card_id,
             direction,
             value,
+            market_value
         ),
     )
 
@@ -221,6 +226,7 @@ def save_transaction(transaction):
                 card_id,
                 item.direction,
                 item.value,
+                item.market_value,
                 conn
             )
         conn.commit()
@@ -276,3 +282,66 @@ def get_inventory_values():
     conn.close()
 
     return [dict(row) for row in rows]
+
+def get_transactions_by_date(start_date,end_date):
+    conn = get_connection()
+    try:
+        rows = conn.execute("""
+            SELECT
+                t.transaction_id,
+                t.transaction_type,
+                t.transaction_date,
+                t.cash_received,
+                t.cash_paid,
+                t.notes,
+
+                ti.direction,
+                ti.value,
+                ti.market_value,
+
+                c.product_id,
+                c.condition
+
+            FROM transactions t
+
+            JOIN transaction_items ti
+                ON t.transaction_id = ti.transaction_id
+
+            JOIN cards c
+                ON ti.card_id = c.card_id
+
+            WHERE t.transaction_date BETWEEN ? AND ?
+
+            ORDER BY t.transaction_date DESC,
+                    t.transaction_id DESC
+            """,
+            (start_date, end_date)
+        ).fetchall()
+        transactions = {}
+
+        for row in rows:
+            transaction_id = row["transaction_id"]
+
+            if transaction_id not in transactions:
+                transactions[transaction_id] = {
+                    "transaction_id": transaction_id,
+                    "transaction_type": row["transaction_type"],
+                    "transaction_date": row["transaction_date"],
+                    "cash_received": row["cash_received"],
+                    "cash_paid": row["cash_paid"],
+                    "notes": row["notes"],
+                    "items": []
+                }
+
+            transactions[transaction_id]["items"].append({
+                "product_id": row["product_id"],
+                "condition": row["condition"],
+                "direction": row["direction"],
+                "value": row["value"],
+                "market_value": row["market_value"]
+            })
+
+        return list(transactions.values())
+
+    finally:
+        conn.close()

@@ -3,7 +3,8 @@ let selectedCards = [];
 let incomingCards = {};
 let outgoingCards = {};
 let currentSearchResults = [];
-
+let cash_paid = 0;
+let cash_received = 0;
 
 async function loadData() {
     //update to data_local.txt later
@@ -137,7 +138,8 @@ function addCard(product, direction, value, condition) {
             //price: priceNum,
             //product_id: id,
             qty: 0,
-            value: value,
+            value: Number(value),
+            market_value: Number(product.price),
             condition: "NM",
             notes: ""
         };
@@ -177,37 +179,141 @@ function clearAll(){
 function updateTotals() {
     let incomingTotal = 0;
     let outgoingTotal = 0;
-    let cashPaid=0;
-    let cashReceived=0;
+    let cashIncomingVal=0;
+    let cashOutgoingVal=0
     const transactionType = getTransactionType();
     for (const id in incomingCards) {
         const card = incomingCards[id];
         incomingTotal += card.product.price * card.qty;
-        cashPaid += card.value * card.qty;
+        cashIncomingVal += card.value * card.qty;
     }
     for (const id in outgoingCards) {
         const card = outgoingCards[id];
         outgoingTotal += card.product.price * card.qty;
-        cashReceived += card.value * card.qty;
+        cashOutgoingVal += card.value * card.qty;
     }
-    let tradeValue=(incomingTotal*0.8).toFixed(2)
-    let incomingHTML=`<b>Incoming Market:</b> $${incomingTotal.toFixed(2)}<br/>
-        <b>Incoming CashValue:</b> $${(incomingTotal*0.7).toFixed(2)}<br/>
-        <b>Incoming Cash:</b> $${(cashPaid).toFixed(2)}<br/>`
-    let outgoingHTML=`<b>Outgoing Market:</b> $${outgoingTotal.toFixed(2)}<br/>
-        <b>Outgoing Cash:</b> $${(cashReceived).toFixed(2)}<br/>`
-    let tradeHTML=`<b>Incoming Market:</b> $${incomingTotal.toFixed(2)}
-        <b>Incoming TradeValue:</b> $${(incomingTotal*0.8).toFixed(2)}<br/>
-        <b>Incoming Cash:</b> $${(cashPaid).toFixed(2)}<br/>`
+    let tradeValue=(incomingTotal*0.8);
+    let buyValue=(incomingTotal*0.7);
+    let incomingValue=0;
+    if (transactionType === "BUY") { 
+        incomingValue=buyValue;
+    }
+    else if (transactionType === "TRADE")  {
+        incomingValue=tradeValue;
+    }
+    let html = `
+        <div class="summary-title">Summary</div>
+        <table class="transaction-summary">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>Market</th>
+                    <th>Value</th>
+                </tr>
+            </thead>
+
+        <tbody>
+    `;
+
+    if (transactionType === "BUY" || transactionType === "TRADE") {
+        html += `
+            <tr>
+                <td>Incoming</td>
+                <td>$${incomingTotal.toFixed(2)}</td>
+                <td>$${incomingValue.toFixed(2)}</td>
+            </tr>
+        `;
+    }
+
+    if (transactionType === "SELL" || transactionType === "TRADE") {
+        html += `
+            <tr>
+                <td>Outgoing</td>
+                <td>$${outgoingTotal.toFixed(2)}</td>
+                <td>$${cashOutgoingVal.toFixed(2)}</td>
+            </tr>    
+        `;
+    }
+    html += `
+            </tbody>
+        </table>
+    `;
+
+    const tradeDifference = cashOutgoingVal-(Math.round(incomingValue));
+    const absoluteDifference = Math.abs(tradeDifference);
     if (transactionType === "BUY") {
-        document.getElementById("totals").innerHTML=incomingHTML
+        cash_paid = Math.round(cashIncomingVal * .7);
+        cash_received = 0;
     }
-    else if (transactionType ==="SELL") {
-        document.getElementById("totals").innerHTML=outgoingHTML
+    else if (transactionType === "SELL") {
+        cash_received = Math.round(cashOutgoingVal);
+        cash_paid = 0;
     }
-    else {
-        document.getElementById("totals").innerHTML=tradeHTML + outgoingHTML + `<b>Difference:</b> $${(tradeValue-cashReceived).toFixed(2)}<br/>`
+    else if (transactionType === "TRADE") {
+        if (tradeDifference > 0) {
+            cash_received = tradeDifference;
+            cash_paid = 0;
+        }
+        else if (tradeDifference < 0) {
+            cash_paid = Math.abs(tradeDifference);
+            cash_received = 0;
+        }
+        else {
+            cash_paid = 0;
+            cash_received = 0;
+        }
     }
+    if (transactionType === "TRADE") {
+        if (tradeDifference > 0) {
+            html += `
+                <div class="trade-balance">
+                    <div>Trade Balance</div>
+                    <div class="trade-balance-amount">
+                        You receive $${absoluteDifference} cash
+                    </div>
+                </div>
+            `;
+        }
+        else if (tradeDifference < 0) {
+            html += `
+                <div class="trade-balance">
+                    <div>Trade Balance</div>
+                    <div class="trade-balance-amount">
+                        You pay $${absoluteDifference} cash
+                    </div>
+                </div>
+            `;
+        }
+        else {
+            html += `
+                <div class="trade-balance">
+                    <div>Trade Balance</div>
+                    <div class="trade-balance-amount">
+                        Even trade
+                    </div>
+                </div>
+            `;
+        }
+    }
+    if (transactionType === "BUY") {
+        html += `
+        <div class="buy-balance">
+            <div>Buy Balance</div>
+                Pay them $${cash_paid} cash
+            </div>
+        </div>
+    `;
+    }
+    if (transactionType === "SELL") {
+        html += `
+        <div class="sell-balance">
+            <div>Sell Balance</div>
+                Pay me $${cash_received} cash
+            </div>
+        </div>
+    `;
+    }
+    document.getElementById("totals").innerHTML = html;
 }
 
 function normalize(text) {
@@ -241,7 +347,6 @@ function runSearch() {
 
 function renderCardList(cards,containerId,direction){
     const container = document.getElementById(containerId);
-    console.log("recndercardlist")
     container.innerHTML = "";
     for (const id in cards){
         const card = cards[id];
@@ -255,7 +360,7 @@ function renderCardList(cards,containerId,direction){
         text.innerHTML = `
             <div class="card-name">${card.product.name}</div>
             <div class="card-meta">
-                Qty: ${card.qty} | Market: $${(card.product.price * card.qty).toFixed(2)}
+                Qty: ${card.qty} | Market: $${(card.market_value).toFixed(2)}
             </div>
         `;
 
@@ -338,8 +443,6 @@ function renderCardList(cards,containerId,direction){
     }
 } */
 function renderTransaction() {
-    console.log(incomingCards);
-    console.log(outgoingCards);
     renderCardList(incomingCards, "incomingCards", "IN");
     renderCardList(outgoingCards, "outgoingCards", "OUT");
 }
@@ -356,9 +459,9 @@ function buildItems(cards, direction) {
                 direction: direction,
                 condition: card.condition,          
                 value: card.value,
+                market_value: card.market_value,
                 notes: null
             });
-
         }
     }
 
@@ -366,11 +469,6 @@ function buildItems(cards, direction) {
 }
 async function saveTransaction(){
     const transactionType = getTransactionType();
-    const cash_paid =
-        parseInt(document.getElementById("cash_paid").value) || 0;
-
-    const cash_received =
-        parseInt(document.getElementById("cash_received").value) || 0;
     const direction =
     transactionType === "BUY" ? "IN" :
     transactionType === "SELL" ? "OUT" :
@@ -379,17 +477,17 @@ async function saveTransaction(){
         const card = selectedCards[id]; */
     if (transactionType === "BUY" &&
     Object.keys(incomingCards).length === 0) {
-    alert("Add at least one card.");
-    return;
+        alert("Add at least one card.");
+        return;
     }
     if (transactionType === "SELL" &&
-        Object.keys(outgoingCards).length === 0) {
+    Object.keys(outgoingCards).length === 0) {
         alert("Add at least one card.");
         return;
     }
     if (transactionType === "TRADE" &&
-        (Object.keys(incomingCards).length === 0 ||
-        Object.keys(outgoingCards).length === 0)) {
+    (Object.keys(incomingCards).length === 0 ||
+     Object.keys(outgoingCards).length === 0)) {
         alert("Trades require at least one incoming and one outgoing card.");
         return;
     }
@@ -421,7 +519,7 @@ async function saveTransaction(){
     else {
         alert("Failed to save transaction.");
     }
-    clearCards();
+    clearTransaction();
 }
 async function loadInventory() {
 
@@ -484,15 +582,15 @@ function updateTransactionUI() {
     render(currentSearchResults);
 }
 
-function clearCards() {
+function clearTransaction() {
     incomingCards = {};
     outgoingCards = {}
+    cashPaid = 0;
+    cashReceived = 0;
     renderTransaction();
+    updateTotals();
 }
-function clearCashValues() {
 
-    renderTransaction();
-}
 function showSearch() {
 
     document.getElementById("inventoryView").style.display = "none";
