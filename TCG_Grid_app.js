@@ -368,7 +368,6 @@ function renderCardList(cards,containerId,direction){
         valueLabel.textContent = "Value: $";
 
         const valueInput = document.createElement("input");
-        console.log("Creating value input for:", card.product.name);
         valueInput.type = "number";
         valueInput.step = "1";
         valueInput.min = "0";
@@ -633,8 +632,6 @@ async function loadTransactions() {
 
     const transactions = await response.json();
 
-    console.log("Transactions:", transactions);
-
     renderTransactions(transactions);
 }
 function renderTransactions(transactions) {
@@ -742,6 +739,8 @@ function renderTransactionSummary(transactions){
     let cashPaidForInventory = 0;
     let tradeCashReceived = 0;
     let tradeCashPaid = 0;
+    let tradeValueIn = 0;
+    let tradeValueOut = 0;
 
     for (const transaction of transactions) {
 
@@ -760,6 +759,15 @@ function renderTransactionSummary(transactions){
         for (const item of transaction.items) {
             if (item.direction === "IN") {
                 inventoryAdded += Number(item.market_value);
+            }
+            if (transaction.transaction_type === "TRADE") {
+                if (item.direction === "IN") {
+                    tradeValueIn += Number(item.value);
+                }
+
+                if (item.direction === "OUT") {
+                    tradeValueOut += Number(item.value);
+                }
             }
         }
 
@@ -790,6 +798,12 @@ function renderTransactionSummary(transactions){
 
                 <div>Trade Cash Paid</div>
                 <div>$${tradeCashPaid.toFixed(2)}</div>
+
+                <div>Trade Value In</div>
+                <div>$${tradeValueIn.toFixed(2)}</div>
+
+                <div>Trade Value Out</div>
+                <div>$${tradeValueOut.toFixed(2)}</div>
             </div>
         </div>
     `;    
