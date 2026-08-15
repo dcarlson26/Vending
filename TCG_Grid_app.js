@@ -499,7 +499,8 @@ async function saveTransaction(){
     transaction_type: transactionType,
     cash_received: cash_received,
     cash_paid: cash_paid,
-    items: items
+    items: items,
+    transaction_date: transactionDateInput.value
     };
 
     //uncomment this and replace local host once we have the fastAPI in place
@@ -540,30 +541,59 @@ function showInventory() {
 function renderInventory(inventory) {
     const body = document.getElementById("inventoryBody");
     body.innerHTML = "";
-    //row.textContent =`product | condition | cost | price | profit/loss`
-    for (const item of inventory){
+
+    let totalMarket = 0;
+    let totalCashPaid = 0;
+    let totalProfit = 0;
+    let totalValue = 0;
+
+    for (const item of inventory) {
         const product = products.find(
             p => p.product_id === item.product_id
         );
-        if (!product){
+
+        if (!product) {
             continue;
         }
-        const row = document.createElement("tr");
-        const profit = product.price - item.cash_paid;
-        row.innerHTML = `
-        <td>${product.name}</td>
-        <td>${product.setName}</td>
-        <td>${item.condition}</td>
-        <td>$${product.price.toFixed(2)}</td>
-        <td>$${item.cash_paid.toFixed(2)}</td>
-        <td>$${profit.toFixed(2)}</td>
-        <td>$${item.value}</td>
-        `;
-        body.appendChild(row);
-        //row.textContent =`${product.name} | ${item.condition} | $${product.price} | $${item.cash_paid} | $${profit.toFixed(2)} | $${item.value}`;
 
-        //container.appendChild(row);
+        const marketPrice = Number(product.price);
+        const cashPaid = Number(item.cash_paid);
+        const value = Number(item.value);
+        const profit = marketPrice - cashPaid;
+
+        totalMarket += marketPrice;
+        totalCashPaid += cashPaid;
+        totalProfit += profit;
+        totalValue += value;
+
+        const row = document.createElement("tr");
+
+        row.innerHTML = `
+            <td>${product.name}</td>
+            <td>${product.setName}</td>
+            <td>${item.condition}</td>
+            <td>$${marketPrice.toFixed(2)}</td>
+            <td>$${cashPaid.toFixed(2)}</td>
+            <td>$${profit.toFixed(2)}</td>
+            <td>$${value.toFixed(2)}</td>
+        `;
+
+        body.appendChild(row);
     }
+
+    const footer = document.getElementById("inventoryTotals");
+
+    footer.innerHTML = `
+        <tr>
+            <td colspan="3"><strong>Total</strong></td>
+            <td><strong>$${totalMarket.toFixed(2)}</strong></td>
+            <td><strong>$${totalCashPaid.toFixed(2)}</strong></td>
+            <td><strong>$${totalProfit.toFixed(2)}</strong></td>
+            <td><strong>$${totalValue.toFixed(2)}</strong></td>
+        </tr>
+    `;
+
+    
 }
 
 function updateTransactionUI() {
@@ -808,7 +838,15 @@ function renderTransactionSummary(transactions){
         </div>
     `;    
 }
+function getLocalDateString() {
+    const today = new Date();
 
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, "0");
+    const day = String(today.getDate()).padStart(2, "0");
+
+    return `${year}-${month}-${day}`;
+}
 
 document.getElementById("search").addEventListener("keydown", (e) => {
     if (e.key === "Enter") {
@@ -824,6 +862,10 @@ document.getElementById("saveTransactionButton").addEventListener("click", saveT
 
 document.getElementById("transactionTab").addEventListener("click", showTransactions);
 document.getElementById("loadTransactionsButton").addEventListener("click", loadTransactions);
+
+const transactionDateInput = document.getElementById("transactionDate");
+
+transactionDateInput.value = getLocalDateString();
 
 const startDateInput = document.getElementById("transactionStartDate");
 const endDateInput = document.getElementById("transactionEndDate");

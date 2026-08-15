@@ -120,7 +120,7 @@
         }
 
         #inventoryTable th {
-            background: #eee;
+            background: #8a8989;
             text-align: left;
         }
 
@@ -356,8 +356,8 @@
                 margin-bottom: 12px;
             }
             .inventory-table th {
-                background: #333;
-                color: #fff;
+                background: #5c5c5c;
+                color: #2903cf;
             }
             #saveTransactionButton {
                 width: 100%;
@@ -420,6 +420,11 @@
 
     </div>
 
+    <div class="transaction-date">
+        <label for="transactionDate">Date:</label>
+        <input type="date" id="transactionDate">
+    </div>
+
     <input type="text" id="search" placeholder="Search..." />
 
     <button id="searchBtn">Search</button>
@@ -471,6 +476,9 @@
 
         <tbody id="inventoryBody">
         </tbody>
+
+        <tfoot id="inventoryTotals">
+        </tfoot>
     </table>
 
 </div>
