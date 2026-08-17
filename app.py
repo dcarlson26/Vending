@@ -47,4 +47,11 @@ def get_transactions(
 
 frontend_dir = Path(__file__).parent.parent / "frontend"
 
-app.mount("/", StaticFiles(directory=frontend_dir, html=True), name="frontend")
+app.mount(
+    "/",
+    StaticFiles(
+        directory=Path(__file__).resolve().parent.parent / "frontend",
+        html=True
+    ),
+    name="frontend"
+)

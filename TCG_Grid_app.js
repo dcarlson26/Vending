@@ -523,7 +523,8 @@ async function saveTransaction(){
 
     //uncomment this and replace local host once we have the fastAPI in place
     //const response = await fetch("/api/transactions", {
-    const response = await fetch("http://localhost:8000/api/transactions", {
+    //const response = await fetch("http://localhost:8000/api/transactions", {
+    const response = await fetch("/api/transactions", {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
@@ -667,9 +668,8 @@ async function loadTransactions() {
         alert("Start date cannot be after end date.");
         return;
     }
-    const response = await fetch(
-        `http://localhost:8000/api/transactions?start_date=${startDate}&end_date=${endDate}`
-    );
+    //const response = await fetch(`http://localhost:8000/api/transactions?start_date=${startDate}&end_date=${endDate}`);
+    const response = await fetch(`/api/transactions?start_date=${startDate}&end_date=${endDate}`);
 
     if (!response.ok) {
         console.error("Failed to load transactions");
