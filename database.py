@@ -5,6 +5,11 @@
 import sqlite3
 from pathlib import Path
 from datetime import date
+import psycopg
+from psycopg.rows import dict_row
+import os
+
+DATABASE_URL = os.environ["DATABASE_URL"]
 DB_PATH = Path(__file__).parent / "pokemon.db"
 TRANSACTION_BUY = "BUY"
 TRANSACTION_SELL = "SELL"
@@ -14,21 +19,18 @@ DIRECTION_IN = "IN"
 DIRECTION_OUT = "OUT"
 
 def get_connection():
-    conn = sqlite3.connect(DB_PATH)
-    conn.row_factory = sqlite3.Row
-
-    # Enable foreign keys
-    conn.execute("PRAGMA foreign_keys = ON")
-
-    return conn
+    return psycopg.connect(
+    DATABASE_URL,
+    row_factory=dict_row
+)
 
 def initialize_database():
     conn = get_connection()
 
-    conn.executescript("""
+    conn.execute("""
         CREATE TABLE IF NOT EXISTS cards
         (
-            card_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            card_id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
 
             product_id INTEGER NOT NULL,
 
@@ -41,7 +43,7 @@ def initialize_database():
 
         CREATE TABLE IF NOT EXISTS transactions
         (
-            transaction_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            transaction_id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
 
             transaction_type TEXT NOT NULL,
 
@@ -56,11 +58,13 @@ def initialize_database():
 
         CREATE TABLE IF NOT EXISTS transaction_items
         (
-            transaction_item_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            transaction_item_id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
 
             transaction_id INTEGER NOT NULL,
 
-            card_id INTEGER NOT NULL,
+            card_id INTEGER,
+
+            product_id INTEGER NOT NULL,
 
             direction TEXT NOT NULL,
 
@@ -86,6 +90,12 @@ def create_card(
     conn=None,
 ):
     date_added = date.today().isoformat()
+
+    owns_connection = conn is None
+
+    if owns_connection:
+        conn = get_connection()
+
     cursor = conn.execute(
         """
         INSERT INTO cards
@@ -95,7 +105,8 @@ def create_card(
             date_added,
             notes
         )
-        VALUES (?, ?, ?, ?)
+        VALUES (%s, %s, %s, %s)
+        RETURNING card_id
         """,
         (
             product_id,
@@ -104,13 +115,12 @@ def create_card(
             notes,
         ),
     )
-    owns_connection = conn is None
+
+    card_id = cursor.fetchone()["card_id"]
 
     if owns_connection:
-        conn = get_connection()
-    conn.commit()
-
-    card_id = cursor.lastrowid
+        conn.commit()
+        conn.close()
 
     return card_id
 
@@ -122,6 +132,11 @@ def create_transaction(
     notes=None,
     conn=None,
 ):
+    owns_connection = conn is None
+
+    if owns_connection:
+        conn = get_connection()
+
     cursor = conn.execute(
         """
         INSERT INTO transactions
@@ -132,7 +147,8 @@ def create_transaction(
             cash_paid,
             notes
         )
-        VALUES (?, ?, ?, ?, ?)
+        VALUES (%s, %s, %s, %s, %s)
+        RETURNING transaction_id
         """,
         (
             transaction_type,
@@ -142,19 +158,21 @@ def create_transaction(
             notes,
         ),
     )
-    owns_connection = conn is None
 
-    if owns_connection:
-        conn = get_connection()
     conn.commit()
 
-    transaction_id = cursor.lastrowid
+    transaction_id = cursor.fetchone()["transaction_id"]
+
+    if owns_connection:
+        conn.commit()
+        conn.close()
 
     return transaction_id
 
 def add_transaction_item(
     transaction_id,
     card_id,
+    product_id,
     direction,
     value,
     market_value,
@@ -171,22 +189,26 @@ def add_transaction_item(
         (
             transaction_id,
             card_id,
+            product_id,
             direction,
             value,
             market_value
         )
-        VALUES (?, ?, ?, ?, ?)
+        VALUES (%s, %s, %s, %s, %s, %s)
         """,
         (
             transaction_id,
             card_id,
+            product_id,
             direction,
             value,
             market_value
         ),
     )
 
-    conn.commit()
+    if owns_connection:
+        conn.commit()
+        conn.close()
 
 def save_transaction(transaction):
     conn = get_connection()
@@ -201,7 +223,6 @@ def save_transaction(transaction):
     if transaction.transaction_date is None:
         transaction.transaction_date = date.today().isoformat()
     try:
-        conn.execute("BEGIN")
 
         # create transaction
         transaction_id = create_transaction(
@@ -224,6 +245,7 @@ def save_transaction(transaction):
             add_transaction_item(
                 transaction_id,
                 card_id,
+                item.product_id,
                 item.direction,
                 item.value,
                 item.market_value,
@@ -250,7 +272,7 @@ def get_cards():
         ORDER BY card_id DESC;
      """).fetchall()
     conn.close()
-    return [dict(row) for row in rows]
+    return rows
 
 def get_inventory_values():
     conn = get_connection()
@@ -281,7 +303,7 @@ def get_inventory_values():
     """).fetchall()
     conn.close()
 
-    return [dict(row) for row in rows]
+    return rows
 
 def get_transactions_by_date(start_date,end_date):
     conn = get_connection()
@@ -310,7 +332,7 @@ def get_transactions_by_date(start_date,end_date):
             JOIN cards c
                 ON ti.card_id = c.card_id
 
-            WHERE t.transaction_date BETWEEN ? AND ?
+            WHERE t.transaction_date BETWEEN %s AND %s
 
             ORDER BY t.transaction_date DESC,
                     t.transaction_id DESC

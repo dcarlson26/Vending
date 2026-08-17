@@ -9,6 +9,7 @@ from backend.database import save_transaction
 from backend.database import get_cards
 from backend.database import get_inventory_values
 from backend.database import get_transactions_by_date
+from fastapi.staticfiles import StaticFiles
 
 initialize_database()
 app = FastAPI()

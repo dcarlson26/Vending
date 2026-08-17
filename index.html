@@ -258,6 +258,8 @@
             padding: 12px;
             border: 1px solid #888;
             border-radius: 6px;
+            width: fit-content;
+            max-width: 100%;
         }
 
         .summary-title {
@@ -270,7 +272,9 @@
             grid-template-columns: 1fr auto;
             gap: 6px 20px;
         }
-
+        .summary-grid > div {
+            padding: 2px 0;
+        }
         .summary-grid > div:nth-child(even) {
             text-align: right;
         }

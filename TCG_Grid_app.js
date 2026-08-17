@@ -375,6 +375,7 @@ function renderCardList(cards,containerId,direction){
 
         valueInput.addEventListener("change", () => {
             card.value = Number(valueInput.value);
+            console.log("card value updated")
             renderTransaction();
             updateTotals();
         });
@@ -445,7 +446,7 @@ function renderTransaction() {
     renderCardList(incomingCards, "incomingCards", "IN");
     renderCardList(outgoingCards, "outgoingCards", "OUT");
 }
-function buildItems(cards, direction) {
+function buildItems(cards, direction, transactionType) {
 
     const items = [];
 
@@ -457,7 +458,7 @@ function buildItems(cards, direction) {
                 product_id: card.product.product_id,
                 direction: direction,
                 condition: card.condition,          
-                value: card.value,
+                value: getCardVal(card,transactionType,direction),
                 market_value: card.market_value,
                 notes: null
             });
@@ -466,6 +467,23 @@ function buildItems(cards, direction) {
 
     return items;
 }
+function getCardVal(card,transactionType,direction){
+    if (transactionType === "BUY" && direction === "IN") {
+        return card.market_value * 0.7;
+    }
+
+    if (transactionType === "TRADE" && direction === "IN") {
+        return card.market_value * 0.8;
+    }
+
+    // For an outgoing card, we need its stored acquisition value.
+    if (direction === "OUT") {
+        return card.value;
+    }
+
+    return card.value;
+}
+
 async function saveTransaction(){
     const transactionType = getTransactionType();
     const direction =
@@ -491,8 +509,8 @@ async function saveTransaction(){
         return;
     }
     const items = [
-    ...buildItems(incomingCards, "IN"),
-    ...buildItems(outgoingCards, "OUT")
+    ...buildItems(incomingCards, "IN",transactionType),
+    ...buildItems(outgoingCards, "OUT",transactionType)
     ];
 
     const transaction = {
@@ -637,11 +655,9 @@ function showSearch() {
 }
 
 async function loadTransactions() {
-    const startDate =
-        document.getElementById("transactionStartDate").value;
-
-    const endDate =
-        document.getElementById("transactionEndDate").value;
+    const today = getLocalDateString();
+    startDate = document.getElementById("transactionStartDate").value;
+    endDate = document.getElementById("transactionEndDate").value;
 
     if (!startDate || !endDate) {
         alert("Please select both dates.");
@@ -667,6 +683,7 @@ async function loadTransactions() {
 function renderTransactions(transactions) {
     const container = document.getElementById("transactionResults");
     const summary = document.getElementById("transactionSummary");
+    const today = getLocalDateString();
 
     container.innerHTML = "";
     summary.innerHTML = "";
@@ -862,13 +879,14 @@ document.getElementById("saveTransactionButton").addEventListener("click", saveT
 
 document.getElementById("transactionTab").addEventListener("click", showTransactions);
 document.getElementById("loadTransactionsButton").addEventListener("click", loadTransactions);
-
+const today=getLocalDateString();
 const transactionDateInput = document.getElementById("transactionDate");
+document.getElementById("transactionStartDate").value  = today;
+document.getElementById("transactionEndDate").value  = today;
+transactionDateInput.value = today;
 
-transactionDateInput.value = getLocalDateString();
-
-const startDateInput = document.getElementById("transactionStartDate");
-const endDateInput = document.getElementById("transactionEndDate");
+startDateInput = document.getElementById("transactionStartDate");
+endDateInput = document.getElementById("transactionEndDate");
 
 startDateInput.addEventListener("change", () => {
     if (!endDateInput.value) {
