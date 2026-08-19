@@ -453,12 +453,15 @@ function buildItems(cards, direction, transactionType) {
     for (const card of Object.values(cards)) {
 
         for (let i = 0; i < card.qty; i++) {
-
+            cardValue=getCardVal(card,transactionType,direction);
+            if (direction === "IN") {
+                cardValue = Math.round(value);
+            }
             items.push({
                 product_id: card.product.product_id,
                 direction: direction,
                 condition: card.condition,          
-                value: getCardVal(card,transactionType,direction),
+                value: cardValue,
                 market_value: card.market_value,
                 notes: null
             });
@@ -590,7 +593,6 @@ function renderInventory(inventory) {
         row.innerHTML = `
             <td>${product.name}</td>
             <td>${product.setName}</td>
-            <td>${item.condition}</td>
             <td>$${marketPrice.toFixed(2)}</td>
             <td>$${cashPaid.toFixed(2)}</td>
             <td>$${profit.toFixed(2)}</td>
