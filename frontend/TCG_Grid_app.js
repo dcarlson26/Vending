@@ -47,67 +47,90 @@ async function loadData() {
 function render(searchResults) {
     const container = document.getElementById("searchResults");
     container.innerHTML = "";
-    const transactionType = document.querySelector('input[name="transactionType"]:checked').value;
+
+    const transactionType =
+        document.querySelector('input[name="transactionType"]:checked').value;
 
     searchResults.forEach(p => {
         const div = document.createElement("div");
         div.className = "card";
 
-        div.innerHTML = `
-            <img src="${p.image}" loading="lazy" />
-            <div>
-                <b>${p.name}</b><br/>
-                ${p.subtype}<br/>
-                $${p.price}<br/>
-                ${p.setName}<br/>
-            </div>
+        // Top section: image + information
+        const cardInfo = document.createElement("div");
+        cardInfo.className = "card-info";
+
+        const imageContainer = document.createElement("div");
+        imageContainer.className = "card-image-container";
+
+        const image = document.createElement("img");
+        image.src = p.image;
+        image.loading = "lazy";
+        image.alt = p.name;
+        image.className = "card-image";
+
+        imageContainer.appendChild(image);
+
+        const details = document.createElement("div");
+        details.className = "card-details";
+
+        details.innerHTML = `
+            <div class="card-name">${p.name}</div>
+            <div class="card-subtype">${p.subtype}</div>
+            <div class="card-set">${p.setName}</div>
+            <div class="card-price">$${Number(p.price).toFixed(2)}</div>
         `;
 
+        cardInfo.appendChild(imageContainer);
+        cardInfo.appendChild(details);
+
+        div.appendChild(cardInfo);
+
+        // Bottom section: transaction buttons
+        const actions = document.createElement("div");
+        actions.className = "card-actions";
+
         if (transactionType === "BUY") {
-            const direction = "IN"
             const addButton = document.createElement("button");
             addButton.textContent = "Buy";
 
             addButton.addEventListener("click", () => {
-                addCard(p, direction,p.price);
+                addCard(p, "IN", p.price);
             });
 
-            div.appendChild(addButton);
-
+            actions.appendChild(addButton);
         }
+
         else if (transactionType === "SELL") {
-            const direction = "OUT"
             const addButton = document.createElement("button");
             addButton.textContent = "Sell";
 
             addButton.addEventListener("click", () => {
-                addCard(p, direction ,p.price);
+                addCard(p, "OUT", p.price);
             });
 
-            div.appendChild(addButton);
-
+            actions.appendChild(addButton);
         }
-        else {
 
+        else {
             const receiveButton = document.createElement("button");
             receiveButton.textContent = "Receive";
 
             receiveButton.addEventListener("click", () => {
-                addCard(p, "IN",p.price);
+                addCard(p, "IN", p.price);
             });
-
-            div.appendChild(receiveButton);
 
             const giveButton = document.createElement("button");
             giveButton.textContent = "Give";
 
             giveButton.addEventListener("click", () => {
-                addCard(p, "OUT",p.price);
+                addCard(p, "OUT", p.price);
             });
 
-            div.appendChild(giveButton);
-
+            actions.appendChild(receiveButton);
+            actions.appendChild(giveButton);
         }
+
+        div.appendChild(actions);
 
         container.appendChild(div);
     });
