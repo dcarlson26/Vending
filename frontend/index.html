@@ -4,7 +4,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Card Search</title>
     <style>
-        body { font-family: Arial; }
+        body { font-family: Arial;}
         input {
             padding: 8px;
             font-size: 16px;
@@ -15,37 +15,51 @@
             font-size: 16px;
             margin-left: 5px;
         }
+        #searchResults {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 12px;
+            width: 100%;
+            max-width: 100%;
+            min-width: 0;
+            box-sizing: border-box;
+        }
+
         .card {
+            width: 100%;
+            max-width: 100%;
+            min-width: 0;
+            box-sizing: border-box;
+
             border: 1px solid #ccc;
             background: white;
+            display: flex;
             flex-direction: column;
             gap: 10px;
             padding: 10px;
             border-radius: 10px;
         }
-        img { height: 100px; }
-        #results {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-            gap: 12px;
-            padding: 10px;
+
+        .card-image-container {
+            width: 90px;
+            aspect-ratio: 2.5 / 3.5;
+            flex-shrink: 0;
         }
+
         .card-image {
             width: 100%;
             height: 100%;
             display: block;
             object-fit: contain;
         }
-        .card-image-container {
-            width: 90px;
-            aspect-ratio: 2.5 / 3.5;
-            flex-shrink: 0;
-        }
+
         .card-info {
             display: flex;
             gap: 12px;
             align-items: flex-start;
+            min-width: 0;
         }
+
         .card-details {
             min-width: 0;
             flex: 1;
@@ -68,12 +82,29 @@
 
         .card-actions {
             display: flex;
-            gap: 8px;
+            gap: 6px;
             width: 100%;
+            margin-top: auto;
         }
 
         .card-actions button {
             flex: 1;
+            min-width: 0;
+        }
+
+        @media (max-width: 600px) {
+            #searchResults {
+                grid-template-columns: 1fr;
+            }
+
+            .card-actions {
+                flex-direction: column;
+            }
+
+            .card-actions button {
+                width: 100%;
+                flex: none;
+            }
         }
         #cart {
             position: fixed;
@@ -318,10 +349,6 @@
             text-align: right;
         }
 
-
-
-
-
         @media (max-width: 600px) {
             body {
                 padding-bottom: 45vh; /* adjust to cart height */
@@ -341,15 +368,6 @@
 
                 overflow-y: auto;
                 z-index: 1000;
-            }
-            #results {
-                display: flex !important;
-                flex-direction: column;
-                gap: 10px;
-            }
-            .card {
-                width: 100%;
-                margin-bottom: 10px;
             }
         }
         @media (prefers-color-scheme: dark) {

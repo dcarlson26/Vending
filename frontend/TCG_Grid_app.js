@@ -44,7 +44,7 @@ async function loadData() {
     localStorage.setItem("dataVersion", version);
 }
 
-function render(searchResults) {
+function renderSearch(searchResults) {
     const container = document.getElementById("searchResults");
     container.innerHTML = "";
 
@@ -189,17 +189,17 @@ function removeCard(product,direction) {
 }
 function refreshTransactionUI() {
     renderTransaction();
-    updateTotals();
+    updateTransactionTotals();
 }
 function clearAll(){
     incomingCards = {};
     outgoingCards = {};
-    updateTotals();
-    renderCardList(outgoingCards,"outgoingCards","OUT");
-    renderCardList(incomingCards,"incomingCards","IN");
+    updateTransactionTotals();
+    renderTransactionCardList(outgoingCards,"outgoingCards","OUT");
+    renderTransactionCardList(incomingCards,"incomingCards","IN");
 }
 
-function updateTotals() {
+function updateTransactionTotals() {
     let incomingTotal = 0;
     let outgoingTotal = 0;
     let cashIncomingVal=0;
@@ -365,10 +365,10 @@ function runSearch() {
     });
     filtered.sort((a, b) => parseFloat(b.price) - parseFloat(a.price));
     currentSearchResults = filtered;
-    render(currentSearchResults);
+    renderSearch(currentSearchResults);
 }
 
-function renderCardList(cards,containerId,direction){
+function renderTransactionCardList(cards,containerId,direction){
     const container = document.getElementById(containerId);
     container.innerHTML = "";
     for (const id in cards){
@@ -400,7 +400,7 @@ function renderCardList(cards,containerId,direction){
             card.value = Number(valueInput.value);
             console.log("card value updated")
             renderTransaction();
-            updateTotals();
+            updateTransactionTotals();
         });
 
         text.appendChild(valueLabel);
@@ -425,51 +425,11 @@ function renderCardList(cards,containerId,direction){
         container.appendChild(div);
     }
 }
-
-/* function renderSelectedCards() {
-    const container = document.getElementById("selectedList");
-    container.innerHTML = "";
-
-    for (const id in selectedCards) {
-        const card = selectedCards[id];
-
-        const div = document.createElement("div");
-        div.className = "cart-item";
-
-        const text = document.createElement("div");
-        text.className = "cart-text";
-
-        text.innerHTML = `
-            <div class="card-name">${card.product.name}</div>
-            <div class="card-meta">
-                Qty: ${card.product.qty} | $${(card.product.price * card.product.qty).toFixed(2)}
-            </div>
-        `;
-
-        const actions = document.createElement("div");
-        actions.className = "cart-actions";
-
-        const addBtn = document.createElement("button");
-        addBtn.textContent = "+";
-        addBtn.onclick = () => addCard(card);
-
-        const removeBtn = document.createElement("button");
-        removeBtn.textContent = "-";
-        removeBtn.onclick = () => removeCard(id);
-
-        actions.appendChild(addBtn);
-        actions.appendChild(removeBtn);
-
-        div.appendChild(text);
-        div.appendChild(actions);
-        container.appendChild(div);
-    }
-} */
 function renderTransaction() {
-    renderCardList(incomingCards, "incomingCards", "IN");
-    renderCardList(outgoingCards, "outgoingCards", "OUT");
+    renderTransactionCardList(incomingCards, "incomingCards", "IN");
+    renderTransactionCardList(outgoingCards, "outgoingCards", "OUT");
 }
-function buildItems(cards, direction, transactionType) {
+function buildTransactionItems(cards, direction, transactionType) {
 
     const items = [];
 
@@ -535,8 +495,8 @@ async function saveTransaction(){
         return;
     }
     const items = [
-    ...buildItems(incomingCards, "IN",transactionType),
-    ...buildItems(outgoingCards, "OUT",transactionType)
+    ...buildTransactionItems(incomingCards, "IN",transactionType),
+    ...buildTransactionItems(outgoingCards, "OUT",transactionType)
     ];
 
     const transaction = {
@@ -629,7 +589,7 @@ function renderInventory(inventory) {
 
     footer.innerHTML = `
         <tr>
-            <td colspan="3"><strong>Total</strong></td>
+            <td colspan="2"><strong>Total</strong></td>
             <td><strong>$${totalMarket.toFixed(2)}</strong></td>
             <td><strong>$${totalCashPaid.toFixed(2)}</strong></td>
             <td><strong>$${totalProfit.toFixed(2)}</strong></td>
@@ -656,7 +616,7 @@ function updateTransactionUI() {
         document.getElementById("incomingPanel").style.display = "none";
     }
     //trades show both
-    render(currentSearchResults);
+    renderSearch(currentSearchResults);
 }
 
 function clearTransaction() {
@@ -665,7 +625,7 @@ function clearTransaction() {
     cashPaid = 0;
     cashReceived = 0;
     renderTransaction();
-    updateTotals();
+    updateTransactionTotals();
 }
 
 function showSearch() {
