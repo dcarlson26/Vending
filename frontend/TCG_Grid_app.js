@@ -849,6 +849,17 @@ function getLocalDateString() {
 
     return `${year}-${month}-${day}`;
 }
+function toggleTransactionPanel() {
+    transactionPanel.classList.toggle("collapsed");
+
+    const collapsed =
+        transactionPanel.classList.contains("collapsed");
+
+    transactionPanelToggle.textContent =
+        collapsed ? "▲" : "▼";
+}
+
+
 
 document.getElementById("search").addEventListener("keydown", (e) => {
     if (e.key === "Enter") {
@@ -869,6 +880,18 @@ const transactionDateInput = document.getElementById("transactionDate");
 document.getElementById("transactionStartDate").value  = today;
 document.getElementById("transactionEndDate").value  = today;
 transactionDateInput.value = today;
+
+const transactionPanel =
+    document.getElementById("transactionPanel");
+
+const transactionPanelHeader =
+    document.getElementById("transactionPanelHeader");
+
+const transactionPanelToggle =
+    document.getElementById("transactionPanelToggle");
+
+transactionPanelHeader.addEventListener("click",toggleTransactionPanel);
+
 
 startDateInput = document.getElementById("transactionStartDate");
 endDateInput = document.getElementById("transactionEndDate");
