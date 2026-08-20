@@ -190,6 +190,7 @@ function removeCard(product,direction) {
 function refreshTransactionUI() {
     renderTransaction();
     updateTransactionTotals();
+    updateTransactionPanelHeader();
 }
 function clearAll(){
     incomingCards = {};
@@ -197,6 +198,7 @@ function clearAll(){
     updateTransactionTotals();
     renderTransactionCardList(outgoingCards,"outgoingCards","OUT");
     renderTransactionCardList(incomingCards,"incomingCards","IN");
+    updateTransactionPanelHeader();
 }
 
 function updateTransactionTotals() {
@@ -626,6 +628,7 @@ function clearTransaction() {
     cashReceived = 0;
     renderTransaction();
     updateTransactionTotals();
+    updateTransactionPanelHeader();
 }
 
 function showSearch() {
@@ -858,7 +861,38 @@ function toggleTransactionPanel() {
     transactionPanelToggle.textContent =
         collapsed ? "▲" : "▼";
 }
+function updateTransactionPanelHeader() {
+    const title = document.getElementById("transactionPanelTitle");
+    let count = 0;
+    for (const id in incomingCards) {
+        const card = incomingCards[id];
+        count += card.qty;
+    }
+    for (const id in outgoingCards) {
+        const card = outgoingCards[id];
+        count += card.qty;
+    }
 
+    const transactionType =
+        document.querySelector(
+            'input[name="transactionType"]:checked'
+        ).value;
+
+    if (count === 0) {
+        title.textContent = "Transaction";
+        return;
+    }
+
+    if (transactionType === "TRADE") {
+        // use whatever incoming/outgoing totals
+        // your existing summary logic already calculates
+        title.textContent =
+            `TRADE · ${count} cards`;
+    } else {
+        title.textContent =
+            `${transactionType} · ${count} cards`;
+    }
+}
 
 
 document.getElementById("search").addEventListener("keydown", (e) => {
