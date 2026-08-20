@@ -397,7 +397,7 @@ function renderTransactionCardList(cards,containerId,direction){
         valueInput.step = "1";
         valueInput.min = "0";
         valueInput.value = card.value;
-
+        valueInput.className = "value-input";
         valueInput.addEventListener("change", () => {
             card.value = Number(valueInput.value);
             console.log("card value updated")
