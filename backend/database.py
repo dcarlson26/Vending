@@ -157,8 +157,6 @@ def create_transaction(
         ),
     )
 
-    conn.commit()
-
     transaction_id = cursor.fetchone()["transaction_id"]
 
     if owns_connection:
@@ -221,7 +219,7 @@ def save_transaction(transaction):
     if transaction.transaction_date is None:
         transaction.transaction_date = date.today().isoformat()
     try:
-
+        conn.execute("BEGIN")
         # create transaction
         transaction_id = create_transaction(
             transaction.transaction_type,
@@ -277,6 +275,7 @@ def save_transaction(transaction):
             add_transaction_item(
                 transaction_id,
                 card_id,
+                item.product_id,
                 item.direction,
                 item.value,
                 item.market_value,
@@ -407,7 +406,6 @@ def get_oldest_in_stock_card(product_id, conn):
             card_id
         FROM cards
         WHERE product_id = ?
-          AND condition = ?
           AND in_stock = TRUE
         ORDER BY date_added ASC,
                  card_id ASC
