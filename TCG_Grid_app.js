@@ -105,7 +105,7 @@ function renderSearch(searchResults) {
             addButton.textContent = "Sell";
 
             addButton.addEventListener("click", () => {
-                addCard(p, "OUT", p.price);
+                addCard(p, "OUT", Math.round(p.price));
             });
 
             actions.appendChild(addButton);
@@ -123,7 +123,7 @@ function renderSearch(searchResults) {
             giveButton.textContent = "Give";
 
             giveButton.addEventListener("click", () => {
-                addCard(p, "OUT", p.price);
+                addCard(p, "OUT", Math.round(p.price));
             });
 
             actions.appendChild(receiveButton);
