@@ -281,6 +281,8 @@ def save_transaction(transaction):
                 item.market_value,
                 conn
             )
+        
+        conn.commit()
 
     except Exception:
         conn.rollback()
