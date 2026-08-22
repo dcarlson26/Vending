@@ -105,7 +105,7 @@ function renderSearch(searchResults) {
             addButton.textContent = "Sell";
 
             addButton.addEventListener("click", () => {
-                addCard(p, "OUT", p.price);
+                addCard(p, "OUT", Math.round(p.price));
             });
 
             actions.appendChild(addButton);
@@ -123,7 +123,7 @@ function renderSearch(searchResults) {
             giveButton.textContent = "Give";
 
             giveButton.addEventListener("click", () => {
-                addCard(p, "OUT", p.price);
+                addCard(p, "OUT", Math.round(p.price));
             });
 
             actions.appendChild(receiveButton);
@@ -396,11 +396,12 @@ function renderTransactionCardList(cards,containerId,direction){
         valueInput.type = "number";
         valueInput.step = "1";
         valueInput.min = "0";
-        valueInput.value = card.value;
+        if (direction === "OUT" ) {
+            valueInput.value = Math.round(card.value);
+        } else {valueInput.value = card.value; }
         valueInput.className = "value-input";
         valueInput.addEventListener("change", () => {
             card.value = Number(valueInput.value);
-            console.log("card value updated")
             renderTransaction();
             updateTransactionTotals();
         });
