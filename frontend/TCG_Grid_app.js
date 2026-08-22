@@ -440,7 +440,7 @@ function buildTransactionItems(cards, direction, transactionType) {
         for (let i = 0; i < card.qty; i++) {
             cardValue=getCardVal(card,transactionType,direction);
             if (direction === "IN") {
-                cardValue = Math.round(value);
+                cardValue = Math.round(cardValue);
             }
             items.push({
                 product_id: card.product.product_id,
@@ -457,16 +457,16 @@ function buildTransactionItems(cards, direction, transactionType) {
 }
 function getCardVal(card,transactionType,direction){
     if (transactionType === "BUY" && direction === "IN") {
-        return card.market_value * 0.7;
+        return Math.round(card.market_value * 0.7);
     }
 
     if (transactionType === "TRADE" && direction === "IN") {
-        return card.market_value * 0.8;
+        return Math.round(card.market_value * 0.8);
     }
 
     // For an outgoing card, we need its stored acquisition value.
     if (direction === "OUT") {
-        return card.value;
+        return Math.round(card.value);
     }
 
     return card.value;
