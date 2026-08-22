@@ -161,7 +161,9 @@ function addCard(product, direction, value, condition) {
             //price: priceNum,
             //product_id: id,
             qty: 0,
-            value: Number(value),
+            value: direction === "OUT"
+                ? Math.round(Number(value))
+                : Number(value),
             market_value: Number(product.price),
             condition: "NM",
             notes: ""
