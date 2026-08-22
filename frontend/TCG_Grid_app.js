@@ -457,11 +457,11 @@ function buildTransactionItems(cards, direction, transactionType) {
 }
 function getCardVal(card,transactionType,direction){
     if (transactionType === "BUY" && direction === "IN") {
-        return Math.round(card.market_value * 0.7);
+        return Math.round(card.value * 0.7);
     }
 
     if (transactionType === "TRADE" && direction === "IN") {
-        return Math.round(card.market_value * 0.8);
+        return Math.round(card.value * 0.8);
     }
 
     // For an outgoing card, we need its stored acquisition value.
