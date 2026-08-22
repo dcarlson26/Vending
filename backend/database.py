@@ -13,12 +13,6 @@ from .models import cardCondition
 
 DATABASE_URL = os.environ["DATABASE_URL"]
 DB_PATH = Path(__file__).parent / "pokemon.db"
-TRANSACTION_BUY = "BUY"
-TRANSACTION_SELL = "SELL"
-TRANSACTION_TRADE = "TRADE"
-
-DIRECTION_IN = "IN"
-DIRECTION_OUT = "OUT"
 
 def get_connection():
     return psycopg.connect(
@@ -239,7 +233,7 @@ def save_transaction(transaction):
         )
         for item in transaction.items:
 
-            if item.direction == DIRECTION_IN:
+            if item.direction == Direction.IN:
 
                 # New inventory
                 card_id = create_card(
@@ -270,7 +264,7 @@ def save_transaction(transaction):
 
                     card_id = create_card(
                         item.product_id,
-                        "NM",
+                        cardCondition.NM,
                         "auto-created via sale",
                         conn
                     )
@@ -288,24 +282,6 @@ def save_transaction(transaction):
                 item.market_value,
                 conn
             )
-        for item in transaction.items:
-            card_id = create_card(
-                item.product_id,
-                item.condition,
-                item.notes,
-                conn
-            )
-            # create transaction_items
-            add_transaction_item(
-                transaction_id,
-                card_id,
-                item.product_id,
-                item.direction,
-                item.value,
-                item.market_value,
-                conn
-            )
-        conn.commit()
 
     except Exception:
         conn.rollback()
