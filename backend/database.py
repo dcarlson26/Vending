@@ -38,6 +38,8 @@ def initialize_database():
 
             date_added TEXT NOT NULL,
 
+            in_stock BOOLEAN NOT NULL DEFAULT TRUE,
+
             notes TEXT
         );
 
@@ -299,6 +301,8 @@ def get_inventory_values():
         JOIN transactions t
             ON t.transaction_id = ti.transaction_id
 
+        WHERE c.in_stock = TRUE
+        
         ORDER BY t.transaction_date DESC;
     """).fetchall()
     conn.close()
