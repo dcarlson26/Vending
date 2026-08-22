@@ -8,8 +8,8 @@ from datetime import date
 import psycopg
 from psycopg.rows import dict_row
 import os
-from models import Direction
-from models import cardCondition
+from .models import Direction
+from .models import cardCondition
 
 DATABASE_URL = os.environ["DATABASE_URL"]
 DB_PATH = Path(__file__).parent / "pokemon.db"
