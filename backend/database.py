@@ -407,7 +407,7 @@ def get_oldest_in_stock_card(product_id, conn):
         SELECT
             card_id
         FROM cards
-        WHERE product_id = ?
+        WHERE product_id = %s
           AND in_stock = TRUE
         ORDER BY date_added ASC,
                  card_id ASC
@@ -428,7 +428,7 @@ def mark_card_out_of_stock(card_id, conn):
         """
         UPDATE cards
         SET in_stock = FALSE
-        WHERE card_id = ?
+        WHERE card_id = %s
         """,
         (card_id,)
     )
