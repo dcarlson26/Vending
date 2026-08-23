@@ -9,6 +9,7 @@ from backend.database import save_transaction
 from backend.database import get_cards
 from backend.database import get_inventory_values
 from backend.database import get_transactions_by_date
+from fastapi.staticfiles import StaticFiles
 
 initialize_database()
 app = FastAPI()
@@ -46,4 +47,11 @@ def get_transactions(
 
 frontend_dir = Path(__file__).parent.parent / "frontend"
 
-app.mount("/", StaticFiles(directory=frontend_dir, html=True), name="frontend")
+app.mount(
+    "/",
+    StaticFiles(
+        directory=Path(__file__).resolve().parent.parent / "frontend",
+        html=True
+    ),
+    name="frontend"
+)

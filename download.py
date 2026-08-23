@@ -24,7 +24,7 @@ pokemon_category = '3'
 version = str(int(time.time()))
 
 # Open the file in write mode ('w' to overwrite or 'a' to append)
-with open("data.txt", "w") as file:
+with open("frontend/data.txt", "w") as file:
     file.write(f"#version={version}\n")
     try:
         r = requests.get(f"https://tcgcsv.com/tcgplayer/{pokemon_category}/groups",

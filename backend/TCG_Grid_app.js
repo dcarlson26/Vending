@@ -44,70 +44,93 @@ async function loadData() {
     localStorage.setItem("dataVersion", version);
 }
 
-function render(searchResults) {
+function renderSearch(searchResults) {
     const container = document.getElementById("searchResults");
     container.innerHTML = "";
-    const transactionType = document.querySelector('input[name="transactionType"]:checked').value;
+
+    const transactionType =
+        document.querySelector('input[name="transactionType"]:checked').value;
 
     searchResults.forEach(p => {
         const div = document.createElement("div");
         div.className = "card";
 
-        div.innerHTML = `
-            <img src="${p.image}" loading="lazy" />
-            <div>
-                <b>${p.name}</b><br/>
-                ${p.subtype}<br/>
-                $${p.price}<br/>
-                ${p.setName}<br/>
-            </div>
+        // Top section: image + information
+        const cardInfo = document.createElement("div");
+        cardInfo.className = "card-info";
+
+        const imageContainer = document.createElement("div");
+        imageContainer.className = "card-image-container";
+
+        const image = document.createElement("img");
+        image.src = p.image;
+        image.loading = "lazy";
+        image.alt = p.name;
+        image.className = "card-image";
+
+        imageContainer.appendChild(image);
+
+        const details = document.createElement("div");
+        details.className = "card-details";
+
+        details.innerHTML = `
+            <div class="card-name">${p.name}</div>
+            <div class="card-subtype">${p.subtype}</div>
+            <div class="card-set">${p.setName}</div>
+            <div class="card-price">$${Number(p.price).toFixed(2)}</div>
         `;
 
+        cardInfo.appendChild(imageContainer);
+        cardInfo.appendChild(details);
+
+        div.appendChild(cardInfo);
+
+        // Bottom section: transaction buttons
+        const actions = document.createElement("div");
+        actions.className = "card-actions";
+
         if (transactionType === "BUY") {
-            const direction = "IN"
             const addButton = document.createElement("button");
             addButton.textContent = "Buy";
 
             addButton.addEventListener("click", () => {
-                addCard(p, direction,p.price);
+                addCard(p, "IN", p.price);
             });
 
-            div.appendChild(addButton);
-
+            actions.appendChild(addButton);
         }
+
         else if (transactionType === "SELL") {
-            const direction = "OUT"
             const addButton = document.createElement("button");
             addButton.textContent = "Sell";
 
             addButton.addEventListener("click", () => {
-                addCard(p, direction ,p.price);
+                addCard(p, "OUT", p.price);
             });
 
-            div.appendChild(addButton);
-
+            actions.appendChild(addButton);
         }
-        else {
 
+        else {
             const receiveButton = document.createElement("button");
             receiveButton.textContent = "Receive";
 
             receiveButton.addEventListener("click", () => {
-                addCard(p, "IN",p.price);
+                addCard(p, "IN", p.price);
             });
-
-            div.appendChild(receiveButton);
 
             const giveButton = document.createElement("button");
             giveButton.textContent = "Give";
 
             giveButton.addEventListener("click", () => {
-                addCard(p, "OUT",p.price);
+                addCard(p, "OUT", p.price);
             });
 
-            div.appendChild(giveButton);
-
+            actions.appendChild(receiveButton);
+            actions.appendChild(giveButton);
         }
+
+        div.appendChild(actions);
 
         container.appendChild(div);
     });
@@ -166,17 +189,19 @@ function removeCard(product,direction) {
 }
 function refreshTransactionUI() {
     renderTransaction();
-    updateTotals();
+    updateTransactionTotals();
+    updateTransactionPanelHeader();
 }
 function clearAll(){
     incomingCards = {};
     outgoingCards = {};
-    updateTotals();
-    renderCardList(outgoingCards,"outgoingCards","OUT");
-    renderCardList(incomingCards,"incomingCards","IN");
+    updateTransactionTotals();
+    renderTransactionCardList(outgoingCards,"outgoingCards","OUT");
+    renderTransactionCardList(incomingCards,"incomingCards","IN");
+    updateTransactionPanelHeader();
 }
 
-function updateTotals() {
+function updateTransactionTotals() {
     let incomingTotal = 0;
     let outgoingTotal = 0;
     let cashIncomingVal=0;
@@ -342,10 +367,10 @@ function runSearch() {
     });
     filtered.sort((a, b) => parseFloat(b.price) - parseFloat(a.price));
     currentSearchResults = filtered;
-    render(currentSearchResults);
+    renderSearch(currentSearchResults);
 }
 
-function renderCardList(cards,containerId,direction){
+function renderTransactionCardList(cards,containerId,direction){
     const container = document.getElementById(containerId);
     container.innerHTML = "";
     for (const id in cards){
@@ -372,11 +397,12 @@ function renderCardList(cards,containerId,direction){
         valueInput.step = "1";
         valueInput.min = "0";
         valueInput.value = card.value;
-
+        valueInput.className = "value-input";
         valueInput.addEventListener("change", () => {
             card.value = Number(valueInput.value);
+            console.log("card value updated")
             renderTransaction();
-            updateTotals();
+            updateTransactionTotals();
         });
 
         text.appendChild(valueLabel);
@@ -401,63 +427,26 @@ function renderCardList(cards,containerId,direction){
         container.appendChild(div);
     }
 }
-
-/* function renderSelectedCards() {
-    const container = document.getElementById("selectedList");
-    container.innerHTML = "";
-
-    for (const id in selectedCards) {
-        const card = selectedCards[id];
-
-        const div = document.createElement("div");
-        div.className = "cart-item";
-
-        const text = document.createElement("div");
-        text.className = "cart-text";
-
-        text.innerHTML = `
-            <div class="card-name">${card.product.name}</div>
-            <div class="card-meta">
-                Qty: ${card.product.qty} | $${(card.product.price * card.product.qty).toFixed(2)}
-            </div>
-        `;
-
-        const actions = document.createElement("div");
-        actions.className = "cart-actions";
-
-        const addBtn = document.createElement("button");
-        addBtn.textContent = "+";
-        addBtn.onclick = () => addCard(card);
-
-        const removeBtn = document.createElement("button");
-        removeBtn.textContent = "-";
-        removeBtn.onclick = () => removeCard(id);
-
-        actions.appendChild(addBtn);
-        actions.appendChild(removeBtn);
-
-        div.appendChild(text);
-        div.appendChild(actions);
-        container.appendChild(div);
-    }
-} */
 function renderTransaction() {
-    renderCardList(incomingCards, "incomingCards", "IN");
-    renderCardList(outgoingCards, "outgoingCards", "OUT");
+    renderTransactionCardList(incomingCards, "incomingCards", "IN");
+    renderTransactionCardList(outgoingCards, "outgoingCards", "OUT");
 }
-function buildItems(cards, direction) {
+function buildTransactionItems(cards, direction, transactionType) {
 
     const items = [];
 
     for (const card of Object.values(cards)) {
 
         for (let i = 0; i < card.qty; i++) {
-
+            cardValue=getCardVal(card,transactionType,direction);
+            if (direction === "IN") {
+                cardValue = Math.round(cardValue);
+            }
             items.push({
                 product_id: card.product.product_id,
                 direction: direction,
                 condition: card.condition,          
-                value: card.value,
+                value: cardValue,
                 market_value: card.market_value,
                 notes: null
             });
@@ -466,6 +455,23 @@ function buildItems(cards, direction) {
 
     return items;
 }
+function getCardVal(card,transactionType,direction){
+    if (transactionType === "BUY" && direction === "IN") {
+        return Math.round(card.market_value * 0.7);
+    }
+
+    if (transactionType === "TRADE" && direction === "IN") {
+        return Math.round(card.market_value * 0.8);
+    }
+
+    // For an outgoing card, we need its stored acquisition value.
+    if (direction === "OUT") {
+        return Math.round(card.value);
+    }
+
+    return card.value;
+}
+
 async function saveTransaction(){
     const transactionType = getTransactionType();
     const direction =
@@ -491,8 +497,8 @@ async function saveTransaction(){
         return;
     }
     const items = [
-    ...buildItems(incomingCards, "IN"),
-    ...buildItems(outgoingCards, "OUT")
+    ...buildTransactionItems(incomingCards, "IN",transactionType),
+    ...buildTransactionItems(outgoingCards, "OUT",transactionType)
     ];
 
     const transaction = {
@@ -505,7 +511,8 @@ async function saveTransaction(){
 
     //uncomment this and replace local host once we have the fastAPI in place
     //const response = await fetch("/api/transactions", {
-    const response = await fetch("http://localhost:8000/api/transactions", {
+    //const response = await fetch("http://localhost:8000/api/transactions", {
+    const response = await fetch("/api/transactions", {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
@@ -571,7 +578,6 @@ function renderInventory(inventory) {
         row.innerHTML = `
             <td>${product.name}</td>
             <td>${product.setName}</td>
-            <td>${item.condition}</td>
             <td>$${marketPrice.toFixed(2)}</td>
             <td>$${cashPaid.toFixed(2)}</td>
             <td>$${profit.toFixed(2)}</td>
@@ -585,7 +591,7 @@ function renderInventory(inventory) {
 
     footer.innerHTML = `
         <tr>
-            <td colspan="3"><strong>Total</strong></td>
+            <td colspan="2"><strong>Total</strong></td>
             <td><strong>$${totalMarket.toFixed(2)}</strong></td>
             <td><strong>$${totalCashPaid.toFixed(2)}</strong></td>
             <td><strong>$${totalProfit.toFixed(2)}</strong></td>
@@ -612,7 +618,7 @@ function updateTransactionUI() {
         document.getElementById("incomingPanel").style.display = "none";
     }
     //trades show both
-    render(currentSearchResults);
+    renderSearch(currentSearchResults);
 }
 
 function clearTransaction() {
@@ -621,7 +627,8 @@ function clearTransaction() {
     cashPaid = 0;
     cashReceived = 0;
     renderTransaction();
-    updateTotals();
+    updateTransactionTotals();
+    updateTransactionPanelHeader();
 }
 
 function showSearch() {
@@ -637,11 +644,9 @@ function showSearch() {
 }
 
 async function loadTransactions() {
-    const startDate =
-        document.getElementById("transactionStartDate").value;
-
-    const endDate =
-        document.getElementById("transactionEndDate").value;
+    const today = getLocalDateString();
+    startDate = document.getElementById("transactionStartDate").value;
+    endDate = document.getElementById("transactionEndDate").value;
 
     if (!startDate || !endDate) {
         alert("Please select both dates.");
@@ -651,9 +656,8 @@ async function loadTransactions() {
         alert("Start date cannot be after end date.");
         return;
     }
-    const response = await fetch(
-        `http://localhost:8000/api/transactions?start_date=${startDate}&end_date=${endDate}`
-    );
+    //const response = await fetch(`http://localhost:8000/api/transactions?start_date=${startDate}&end_date=${endDate}`);
+    const response = await fetch(`/api/transactions?start_date=${startDate}&end_date=${endDate}`);
 
     if (!response.ok) {
         console.error("Failed to load transactions");
@@ -667,6 +671,7 @@ async function loadTransactions() {
 function renderTransactions(transactions) {
     const container = document.getElementById("transactionResults");
     const summary = document.getElementById("transactionSummary");
+    const today = getLocalDateString();
 
     container.innerHTML = "";
     summary.innerHTML = "";
@@ -847,6 +852,48 @@ function getLocalDateString() {
 
     return `${year}-${month}-${day}`;
 }
+function toggleTransactionPanel() {
+    transactionPanel.classList.toggle("collapsed");
+
+    const collapsed =
+        transactionPanel.classList.contains("collapsed");
+
+    transactionPanelToggle.textContent =
+        collapsed ? "▲" : "▼";
+}
+function updateTransactionPanelHeader() {
+    const title = document.getElementById("transactionPanelTitle");
+    let count = 0;
+    for (const id in incomingCards) {
+        const card = incomingCards[id];
+        count += card.qty;
+    }
+    for (const id in outgoingCards) {
+        const card = outgoingCards[id];
+        count += card.qty;
+    }
+
+    const transactionType =
+        document.querySelector(
+            'input[name="transactionType"]:checked'
+        ).value;
+
+    if (count === 0) {
+        title.textContent = "Transaction";
+        return;
+    }
+
+    if (transactionType === "TRADE") {
+        // use whatever incoming/outgoing totals
+        // your existing summary logic already calculates
+        title.textContent =
+            `TRADE · ${count} cards`;
+    } else {
+        title.textContent =
+            `${transactionType} · ${count} cards`;
+    }
+}
+
 
 document.getElementById("search").addEventListener("keydown", (e) => {
     if (e.key === "Enter") {
@@ -862,13 +909,26 @@ document.getElementById("saveTransactionButton").addEventListener("click", saveT
 
 document.getElementById("transactionTab").addEventListener("click", showTransactions);
 document.getElementById("loadTransactionsButton").addEventListener("click", loadTransactions);
-
+const today=getLocalDateString();
 const transactionDateInput = document.getElementById("transactionDate");
+document.getElementById("transactionStartDate").value  = today;
+document.getElementById("transactionEndDate").value  = today;
+transactionDateInput.value = today;
 
-transactionDateInput.value = getLocalDateString();
+const transactionPanel =
+    document.getElementById("transactionPanel");
 
-const startDateInput = document.getElementById("transactionStartDate");
-const endDateInput = document.getElementById("transactionEndDate");
+const transactionPanelHeader =
+    document.getElementById("transactionPanelHeader");
+
+const transactionPanelToggle =
+    document.getElementById("transactionPanelToggle");
+
+transactionPanelHeader.addEventListener("click",toggleTransactionPanel);
+
+
+startDateInput = document.getElementById("transactionStartDate");
+endDateInput = document.getElementById("transactionEndDate");
 
 startDateInput.addEventListener("change", () => {
     if (!endDateInput.value) {

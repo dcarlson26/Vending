@@ -23,6 +23,7 @@ class Card(BaseModel):
     product_id: int
     date_added: str
     condition: cardCondition
+    in_stock: bool = True
     notes: str | None = None
 
 class TransactionItem(BaseModel):
