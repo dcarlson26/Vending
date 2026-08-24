@@ -316,6 +316,7 @@ def get_inventory_values():
 
             ti.value,
             ti.direction,
+            ti.market_value,
 
             t.transaction_type,
             t.transaction_date,
