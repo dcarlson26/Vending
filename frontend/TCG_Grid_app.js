@@ -400,7 +400,8 @@ function renderTransactionCardList(cards,containerId,direction){
         valueInput.min = "0";
         if (direction === "OUT" ) {
             valueInput.value = Math.round(card.value);
-        } else {valueInput.value = card.value; }
+            console.log("was in here: " + card.value)
+        } else {valueInput.value = card.value; console.log("else in here: " + card.value) }
         valueInput.className = "value-input";
         valueInput.addEventListener("change", () => {
             card.value = Number(valueInput.value);
@@ -553,9 +554,9 @@ function renderInventory(inventory) {
     body.innerHTML = "";
 
     let totalMarket = 0;
-    let totalCashPaid = 0;
     let totalProfit = 0;
     let totalValue = 0;
+    let totalMarketPast = 0;
 
     for (const item of inventory) {
         const product = products.find(
@@ -567,24 +568,24 @@ function renderInventory(inventory) {
         }
 
         const marketPrice = Number(product.price);
-        const cashPaid = Number(item.cash_paid);
         const value = Number(item.value);
-        const profit = marketPrice - cashPaid;
+        const profit = marketPrice - value;
+        const market_val_in_past = Number(item.market_value);
 
         totalMarket += marketPrice;
-        totalCashPaid += cashPaid;
         totalProfit += profit;
-        totalValue += value;
+        totalAcquistionCost += value;
+        totalMarketPast += market_val_in_past;
 
         const row = document.createElement("tr");
 
         row.innerHTML = `
             <td>${product.name}</td>
             <td>${product.setName}</td>
-            <td>$${marketPrice.toFixed(2)}</td>
-            <td>$${cashPaid.toFixed(2)}</td>
-            <td>$${profit.toFixed(2)}</td>
             <td>$${value.toFixed(2)}</td>
+            <td>$${marketPrice.toFixed(2)}</td>
+            <td>$${market_val_in_past.toFixed(2)}</td>
+            <td>$${profit.toFixed(2)}</td>
         `;
 
         body.appendChild(row);
@@ -595,10 +596,10 @@ function renderInventory(inventory) {
     footer.innerHTML = `
         <tr>
             <td colspan="2"><strong>Total</strong></td>
+            <td><strong>$${totalAcquistionCost.toFixed(2)}</strong></td>
             <td><strong>$${totalMarket.toFixed(2)}</strong></td>
-            <td><strong>$${totalCashPaid.toFixed(2)}</strong></td>
+            <td><strong>$${totalMarketPast.toFixed(2)}</strong></td>
             <td><strong>$${totalProfit.toFixed(2)}</strong></td>
-            <td><strong>$${totalValue.toFixed(2)}</strong></td>
         </tr>
     `;
 
