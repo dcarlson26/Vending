@@ -557,6 +557,7 @@ function renderInventory(inventory) {
     let totalProfit = 0;
     let totalAcquistionCost = 0;
     let totalMarketPast = 0;
+    let totalCardCount = 0;
 
     for (const item of inventory) {
         const product = products.find(
@@ -566,7 +567,6 @@ function renderInventory(inventory) {
         if (!product) {
             continue;
         }
-
         const marketPrice = Number(product.price);
         const value = Number(item.value);
         const profit = marketPrice - value;
@@ -576,6 +576,7 @@ function renderInventory(inventory) {
         totalProfit += profit;
         totalAcquistionCost += value;
         totalMarketPast += market_val_in_past;
+        totalCardCount += 1;
 
         const row = document.createElement("tr");
 
@@ -595,7 +596,8 @@ function renderInventory(inventory) {
 
     footer.innerHTML = `
         <tr>
-            <td colspan="2"><strong>Total</strong></td>
+            <td colspan="1"><strong>Total</strong></td>
+            <td><strong>$${totalCardCount}</strong></td>
             <td><strong>$${totalAcquistionCost.toFixed(2)}</strong></td>
             <td><strong>$${totalMarket.toFixed(2)}</strong></td>
             <td><strong>$${totalMarketPast.toFixed(2)}</strong></td>
