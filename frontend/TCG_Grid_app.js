@@ -555,7 +555,7 @@ function renderInventory(inventory) {
 
     let totalMarket = 0;
     let totalProfit = 0;
-    let totalValue = 0;
+    let totalAcquistionCost = 0;
     let totalMarketPast = 0;
 
     for (const item of inventory) {
