@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Card Inventory</title>
+
+    <link rel="stylesheet" href="inventory.css">
+</head>
+
+<body>
+
+    <header class="page-header">
+        <h1>Card Inventory</h1>
+        <p>Search available cards</p>
+    </header>
+
+
+    <main>
+
+        <section class="search-section">
+
+            <input
+                type="text"
+                id="searchInput"
+                placeholder="Search by card name..."
+                autocomplete="off"
+            >
+
+        </section>
+
+
+        <section class="filter-section">
+
+            <button
+                class="filter-button active"
+                data-filter="ALL"
+            >
+                All
+            </button>
+
+            <button
+                class="filter-button"
+                data-filter="POKEMON"
+            >
+                Pokémon
+            </button>
+
+            <button
+                class="filter-button"
+                data-filter="TRAINER"
+            >
+                Trainer
+            </button>
+
+        </section>
+
+
+        <section class="inventory-section">
+
+            <div id="inventoryCount"></div>
+
+            <div id="inventoryResults">
+
+                <!-- Cards will be rendered here -->
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <script src="inventory.js"></script>
+
+</body>
+</html>
