@@ -1,4 +1,4 @@
-#version=1789729761
+#version=1789761237
 Greninja ex - 021/128|Holofoil|0.65|https://tcgplayer-cdn.tcgplayer.com/product/696676_200w.jpg|021/128|Double Rare|ME: 30th Celebration|696676
 Sylveon ex - 071/128|Holofoil|1.35|https://tcgplayer-cdn.tcgplayer.com/product/696677_200w.jpg|071/128|Double Rare|ME: 30th Celebration|696677
 Espeon|Holofoil|0.51|https://tcgplayer-cdn.tcgplayer.com/product/696678_200w.jpg|069/128|Common|ME: 30th Celebration|696678
@@ -8201,7 +8201,7 @@ Wooper - 155|Holofoil|2.59|https://tcgplayer-cdn.tcgplayer.com/product/594389_20
 Quagsire - 156|Holofoil|1.83|https://tcgplayer-cdn.tcgplayer.com/product/594403_200w.jpg|156|Promo|SV: Scarlet & Violet Promo Cards|594403
 Zapdos - 157 (Cosmos Holo)|Holofoil|2.14|https://tcgplayer-cdn.tcgplayer.com/product/594405_200w.jpg|157|Promo|SV: Scarlet & Violet Promo Cards|594405
 Pachirisu - 158|Holofoil|0.85|https://tcgplayer-cdn.tcgplayer.com/product/594410_200w.jpg|158|Promo|SV: Scarlet & Violet Promo Cards|594410
-Magneton - 159 (PokÃ©mon Center Exclusive)|Holofoil|67.05|https://tcgplayer-cdn.tcgplayer.com/product/594468_200w.jpg|159|Promo|SV: Scarlet & Violet Promo Cards|594468
+Magneton - 159 (Pokémon Center Exclusive)|Holofoil|67.05|https://tcgplayer-cdn.tcgplayer.com/product/594468_200w.jpg|159|Promo|SV: Scarlet & Violet Promo Cards|594468
 Sprigatito - 191 (Pokemon Horizons Stamped)|Holofoil|3.36|https://tcgplayer-cdn.tcgplayer.com/product/595036_200w.jpg|191|Promo|SV: Scarlet & Violet Promo Cards|595036
 Fuecoco - 192|Holofoil|1.73|https://tcgplayer-cdn.tcgplayer.com/product/595038_200w.jpg|192|Promo|SV: Scarlet & Violet Promo Cards|595038
 Bloodmoon Ursaluna ex - 177|Holofoil|0.95|https://tcgplayer-cdn.tcgplayer.com/product/595473_200w.jpg|177|Promo|SV: Scarlet & Violet Promo Cards|595473
