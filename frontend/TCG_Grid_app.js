@@ -476,61 +476,74 @@ function getCardVal(card,transactionType,direction){
     return card.value;
 }
 
-async function saveTransaction(){
+async function saveTransaction() {
+    const saveButton = document.getElementById("saveTransactionButton");
+    const status = document.getElementById("transactionSaveStatus");
+
     const transactionType = getTransactionType();
-    const direction =
-    transactionType === "BUY" ? "IN" :
-    transactionType === "SELL" ? "OUT" :
-    null;
-    /* for (const id in selectedCards) {
-        const card = selectedCards[id]; */
+
     if (transactionType === "BUY" &&
-    Object.keys(incomingCards).length === 0) {
+        Object.keys(incomingCards).length === 0) {
         alert("Add at least one card.");
         return;
     }
+
     if (transactionType === "SELL" &&
-    Object.keys(outgoingCards).length === 0) {
+        Object.keys(outgoingCards).length === 0) {
         alert("Add at least one card.");
         return;
     }
+
     if (transactionType === "TRADE" &&
-    (Object.keys(incomingCards).length === 0 ||
-     Object.keys(outgoingCards).length === 0)) {
+        (Object.keys(incomingCards).length === 0 ||
+         Object.keys(outgoingCards).length === 0)) {
         alert("Trades require at least one incoming and one outgoing card.");
         return;
     }
+
     const items = [
-    ...buildTransactionItems(incomingCards, "IN",transactionType),
-    ...buildTransactionItems(outgoingCards, "OUT",transactionType)
+        ...buildTransactionItems(incomingCards, "IN", transactionType),
+        ...buildTransactionItems(outgoingCards, "OUT", transactionType)
     ];
 
     const transaction = {
-    transaction_type: transactionType,
-    cash_received: cash_received,
-    cash_paid: cash_paid,
-    items: items,
-    transaction_date: transactionDateInput.value
+        transaction_type: transactionType,
+        cash_received: cash_received,
+        cash_paid: cash_paid,
+        items: items,
+        transaction_date: transactionDateInput.value
     };
 
-    //uncomment this and replace local host once we have the fastAPI in place
-    //const response = await fetch("/api/transactions", {
-    //const response = await fetch("http://localhost:8000/api/transactions", {
-    const response = await fetch("/api/transactions", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify(transaction)
-    });
+    // Prevent another save while this one is running
+    saveButton.disabled = true;
+    saveButton.textContent = "Saving...";
+    status.textContent = "Saving transaction...";
 
-    if (response.ok) {
-        alert("Transaction saved!");
+    try {
+        const response = await fetch("/api/transactions", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(transaction)
+        });
+
+        if (response.ok) {
+            status.textContent = "✓ Transaction saved";
+            clearTransaction();
+        }
+        else {
+            status.textContent = "✕ Failed to save transaction.";
+        }
     }
-    else {
-        alert("Failed to save transaction.");
+    catch (error) {
+        console.error("Error saving transaction:", error);
+        status.textContent = "✕ Unable to save transaction.";
     }
-    clearTransaction();
+    finally {
+        saveButton.disabled = false;
+        saveButton.textContent = "Save Transaction";
+    }
 }
 async function loadInventory() {
     showInventory();
@@ -597,7 +610,7 @@ function renderInventory(inventory) {
     footer.innerHTML = `
         <tr>
             <td colspan="1"><strong>Total</strong></td>
-            <td><strong>$${totalCardCount}</strong></td>
+            <td><strong>${totalCardCount}</strong></td>
             <td><strong>$${totalAcquistionCost.toFixed(2)}</strong></td>
             <td><strong>$${totalMarket.toFixed(2)}</strong></td>
             <td><strong>$${totalMarketPast.toFixed(2)}</strong></td>
