@@ -933,7 +933,7 @@ document.getElementById("searchBtn").addEventListener("click", runSearch);
 document.getElementById("inventoryTab").addEventListener("click", loadInventory);
 
 document.getElementById("searchTab").addEventListener("click", showSearch);
-document.getElementById("saveTransactionButton").addEventListener("click", saveTransaction);
+//document.getElementById("saveTransactionButton").addEventListener("click", saveTransaction);
 
 document.getElementById("transactionTab").addEventListener("click", showTransactions);
 document.getElementById("loadTransactionsButton").addEventListener("click", loadTransactions);
