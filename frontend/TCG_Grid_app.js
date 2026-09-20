@@ -879,6 +879,15 @@ function toggleTransactionPanel() {
 
     transactionPanelToggle.textContent =
         collapsed ? "▲" : "▼";
+
+    if (!collapsed && window.innerWidth <= 768) {
+        setTimeout(() => {
+            window.scrollTo({
+                top: document.documentElement.scrollHeight,
+                behavior: "smooth"
+            });
+        }, 50);
+    }
 }
 function updateTransactionPanelHeader() {
     const title = document.getElementById("transactionPanelTitle");
