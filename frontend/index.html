@@ -197,6 +197,15 @@
         #inventoryTable td:nth-child(n+4) {
             text-align: right;
         }
+        #inventoryTable th {
+            cursor: pointer;
+            user-select: none;
+        }
+
+        #inventoryTable th:hover {
+            background: #737373;
+        }
+
         #transactionPanel {
             position: fixed;
             bottom: 0;
@@ -603,12 +612,12 @@
     <table id="inventoryTable">
         <thead>
             <tr>
-                <th>Card</th>
-                <th>Set</th>
-                <th>Acquistion Cost</th>
-                <th>Market (now)</th>
-                <th>Market (then)</th>
-                <th>Profit/Loss</th>
+                <th onclick="sortInventory(0)">Card</th>
+                <th onclick="sortInventory(1)">Set</th>
+                <th onclick="sortInventory(2)">Acquisition Cost</th>
+                <th onclick="sortInventory(3)">Market (now)</th>
+                <th onclick="sortInventory(4)">Market (then)</th>
+                <th onclick="sortInventory(5)">Profit/Loss</th>
             </tr>
         </thead>
 

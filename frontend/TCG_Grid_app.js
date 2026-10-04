@@ -5,6 +5,9 @@ let outgoingCards = {};
 let currentSearchResults = [];
 let cash_paid = 0;
 let cash_received = 0;
+let inventorySortColumn = null;
+let inventorySortDirection = "asc";
+let currentInventory = [];
 
 async function loadData() {
     //update to data_local.txt later
@@ -400,8 +403,7 @@ function renderTransactionCardList(cards,containerId,direction){
         valueInput.min = "0";
         if (direction === "OUT" ) {
             valueInput.value = Math.round(card.value);
-            console.log("was in here: " + card.value)
-        } else {valueInput.value = card.value; console.log("else in here: " + card.value) }
+        } else {valueInput.value = card.value;  }
         valueInput.className = "value-input";
         valueInput.addEventListener("change", () => {
             card.value = Number(valueInput.value);
@@ -481,7 +483,8 @@ async function saveTransaction() {
     const status = document.getElementById("transactionSaveStatus");
 
     const transactionType = getTransactionType();
-
+    console.count("saveTransaction called");
+    console.trace("saveTransaction caller");
     if (transactionType === "BUY" &&
         Object.keys(incomingCards).length === 0) {
         alert("Add at least one card.");
@@ -566,11 +569,15 @@ function renderInventory(inventory) {
     const body = document.getElementById("inventoryBody");
     body.innerHTML = "";
 
+    currentInventory = inventory;
+    
     let totalMarket = 0;
     let totalProfit = 0;
     let totalAcquistionCost = 0;
     let totalMarketPast = 0;
     let totalCardCount = 0;
+
+    const rows = [];
 
     for (const item of inventory) {
         const product = products.find(
@@ -580,6 +587,7 @@ function renderInventory(inventory) {
         if (!product) {
             continue;
         }
+
         const marketPrice = Number(product.price);
         const value = Number(item.value);
         const profit = marketPrice - value;
@@ -591,20 +599,78 @@ function renderInventory(inventory) {
         totalMarketPast += market_val_in_past;
         totalCardCount += 1;
 
+        rows.push({
+            product,
+            value,
+            marketPrice,
+            market_val_in_past,
+            profit
+        });
+    }
+
+    // Sort the rows if a column has been selected.
+    if (inventorySortColumn !== null) {
+        rows.sort((a, b) => {
+            let comparison;
+
+            switch (inventorySortColumn) {
+                case 0: // Card
+                    comparison = a.product.name.localeCompare(
+                        b.product.name,
+                        undefined,
+                        { numeric: true, sensitivity: "base" }
+                    );
+                    break;
+
+                case 1: // Set
+                    comparison = a.product.setName.localeCompare(
+                        b.product.setName,
+                        undefined,
+                        { numeric: true, sensitivity: "base" }
+                    );
+                    break;
+
+                case 2: // Acquisition Cost
+                    comparison = a.value - b.value;
+                    break;
+
+                case 3: // Market (now)
+                    comparison = a.marketPrice - b.marketPrice;
+                    break;
+
+                case 4: // Market (then)
+                    comparison =
+                        a.market_val_in_past - b.market_val_in_past;
+                    break;
+
+                case 5: // Profit/Loss
+                    comparison = a.profit - b.profit;
+                    break;
+            }
+
+            return inventorySortDirection === "asc"
+                ? comparison
+                : -comparison;
+        });
+    }
+
+    // Render sorted rows.
+    for (const item of rows) {
         const row = document.createElement("tr");
 
         row.innerHTML = `
-            <td>${product.name}</td>
-            <td>${product.setName}</td>
-            <td>$${value.toFixed(2)}</td>
-            <td>$${marketPrice.toFixed(2)}</td>
-            <td>$${market_val_in_past.toFixed(2)}</td>
-            <td>$${profit.toFixed(2)}</td>
+            <td>${item.product.name}</td>
+            <td>${item.product.setName}</td>
+            <td>$${item.value.toFixed(2)}</td>
+            <td>$${item.marketPrice.toFixed(2)}</td>
+            <td>$${item.market_val_in_past.toFixed(2)}</td>
+            <td>$${item.profit.toFixed(2)}</td>
         `;
 
         body.appendChild(row);
     }
 
+    // Render totals.
     const footer = document.getElementById("inventoryTotals");
 
     footer.innerHTML = `
@@ -618,7 +684,39 @@ function renderInventory(inventory) {
         </tr>
     `;
 
-    
+    updateInventorySortIndicators();
+}
+function sortInventory(column) {
+    if (inventorySortColumn === column) {
+        // Clicking the active column reverses its direction.
+        inventorySortDirection =
+            inventorySortDirection === "asc" ? "desc" : "asc";
+    } else {
+        // A new column starts in ascending order.
+        inventorySortColumn = column;
+        inventorySortDirection = "asc";
+    }
+
+    renderInventory(currentInventory);
+}
+
+function updateInventorySortIndicators() {
+    const headers = document.querySelectorAll(
+        "#inventoryTable thead th"
+    );
+
+    headers.forEach((header, index) => {
+        // Remove any previous arrow.
+        header.textContent = header.textContent
+            .replace(/ [▲▼]$/, "");
+
+        if (index === inventorySortColumn) {
+            const arrow =
+                inventorySortDirection === "asc" ? " ▲" : " ▼";
+
+            header.textContent += arrow;
+        }
+    });
 }
 
 function updateTransactionUI() {
