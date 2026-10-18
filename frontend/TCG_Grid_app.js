@@ -157,6 +157,8 @@ function addCard(product, direction, value, condition) {
     direction === "IN"
         ? "incomingCards"
         : "outgoingCards";
+    const transactionType = getTransactionType();
+    
     if (!selected[id]) {
         selected[id] = {
             product: product,
@@ -164,13 +166,14 @@ function addCard(product, direction, value, condition) {
             //price: priceNum,
             //product_id: id,
             qty: 0,
-            value: direction === "OUT"
-                ? Math.round(Number(value))
-                : Number(value),
             market_value: Number(product.price),
             condition: "NM",
-            notes: ""
+            notes: "",
+            hasOverride: false
         };
+        card.value = direction === "IN"
+            ? getDefaultCardValue(card, transactionType, direction)
+            : Math.round(Number(value));
     }
     selected[id].qty++;
 
@@ -215,7 +218,7 @@ function updateTransactionTotals() {
     for (const id in incomingCards) {
         const card = incomingCards[id];
         incomingTotal += card.product.price * card.qty;
-        cashIncomingVal += card.value * card.qty;
+        cashIncomingVal += getCardVal(card, transactionType, "IN") * card.qty;
     }
     for (const id in outgoingCards) {
         const card = outgoingCards[id];
@@ -407,8 +410,8 @@ function renderTransactionCardList(cards,containerId,direction){
         valueInput.className = "value-input";
         valueInput.addEventListener("change", () => {
             card.value = Number(valueInput.value);
-            renderTransaction();
-            updateTransactionTotals();
+            card.hasOverride = true;
+            refreshTransactionUI();
         });
 
         text.appendChild(valueLabel);
@@ -462,22 +465,28 @@ function buildTransactionItems(cards, direction, transactionType) {
     return items;
 }
 function getCardVal(card,transactionType,direction){
-    if (transactionType === "BUY" && direction === "IN") {
-        return Math.round(card.value * 0.7);
-    }
-
-    if (transactionType === "TRADE" && direction === "IN") {
-        return Math.round(card.value * 0.8);
+     if (direction === "IN" && !card.hasOverride) {
+        return getDefaultCardValue(card, transactionType, direction);
     }
 
     // For an outgoing card, we need its stored acquisition value.
-    if (direction === "OUT") {
-        return Math.round(card.value);
+    // for anything with an override, use the override (stored in card.value)
+
+    return Math.round(Number(card.value));
+}
+function getDefaultCardValue(card, transactionType, direction) {
+    const marketValue = Number(card.market_value);
+
+    if (direction === "IN" && transactionType === "BUY") {
+        return Math.round(marketValue * 0.7);
     }
 
-    return card.value;
-}
+    if (direction === "IN" && transactionType === "TRADE") {
+        return Math.round(marketValue * 0.8);
+    }
 
+    return Math.round(marketValue);
+}
 async function saveTransaction() {
     const saveButton = document.getElementById("saveTransactionButton");
     const status = document.getElementById("transactionSaveStatus");
@@ -721,9 +730,7 @@ function updateInventorySortIndicators() {
 
 function updateTransactionUI() {
 
-    const type = document.querySelector(
-        'input[name="transactionType"]:checked'
-    ).value;
+    const type = getTransactionType();
 
     document.getElementById("incomingPanel").style.display = "";
     document.getElementById("outgoingPanel").style.display = "";
@@ -734,8 +741,16 @@ function updateTransactionUI() {
     else if (type === "SELL") {
         document.getElementById("incomingPanel").style.display = "none";
     }
+    for (const id in incomingCards) {
+        const card = incomingCards[id];
+
+        if (!card.hasOverride) {
+            card.value = getDefaultCardValue(card, type, "IN");
+        }
+    }
     //trades show both
     renderSearch(currentSearchResults);
+    refreshTransactionUI();
 }
 
 function clearTransaction() {
