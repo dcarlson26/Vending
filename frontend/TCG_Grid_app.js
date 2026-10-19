@@ -160,7 +160,7 @@ function addCard(product, direction, value, condition) {
     const transactionType = getTransactionType();
     
     if (!selected[id]) {
-        selected[id] = {
+        const card = {
             product: product,
             //name: name,
             //price: priceNum,
@@ -171,9 +171,12 @@ function addCard(product, direction, value, condition) {
             notes: "",
             hasOverride: false
         };
+
         card.value = direction === "IN"
             ? getDefaultCardValue(card, transactionType, direction)
             : Math.round(Number(value));
+        
+        selected[id] = card;
     }
     selected[id].qty++;
 
