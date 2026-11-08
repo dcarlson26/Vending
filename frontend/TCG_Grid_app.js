@@ -451,9 +451,6 @@ function buildTransactionItems(cards, direction, transactionType) {
 
         for (let i = 0; i < card.qty; i++) {
             cardValue=getCardVal(card,transactionType,direction);
-            if (direction === "IN") {
-                cardValue = Math.round(cardValue);
-            }
             items.push({
                 product_id: card.product.product_id,
                 direction: direction,
@@ -475,20 +472,21 @@ function getCardVal(card,transactionType,direction){
     // For an outgoing card, we need its stored acquisition value.
     // for anything with an override, use the override (stored in card.value)
 
-    return Math.round(Number(card.value));
+    return Number(card.value);
 }
 function getDefaultCardValue(card, transactionType, direction) {
     const marketValue = Number(card.market_value);
-
+    // don't round anything here - let the UI handle that part
+    // we want the precision for card data
     if (direction === "IN" && transactionType === "BUY") {
-        return Math.round(marketValue * 0.7);
+        return marketValue * 0.7;
     }
 
     if (direction === "IN" && transactionType === "TRADE") {
-        return Math.round(marketValue * 0.8);
+        return marketValue * 0.8;
     }
 
-    return Math.round(marketValue);
+    return marketValue;
 }
 async function saveTransaction() {
     const saveButton = document.getElementById("saveTransactionButton");
