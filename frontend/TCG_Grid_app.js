@@ -212,6 +212,10 @@ function clearAll(){
     updateTransactionPanelHeader();
 }
 
+function roundToCents(value) {
+    return Math.round((Number(value) + Number.EPSILON) * 100) / 100;
+}
+
 function updateTransactionTotals() {
     let incomingTotal = 0;
     let outgoingTotal = 0;
@@ -407,9 +411,11 @@ function renderTransactionCardList(cards,containerId,direction){
         valueInput.type = "number";
         valueInput.step = "1";
         valueInput.min = "0";
-        if (direction === "OUT" ) {
+        if (direction === "OUT") {
             valueInput.value = Math.round(card.value);
-        } else {valueInput.value = card.value;  }
+        } else {
+            valueInput.value = roundToCents(card.value);
+        }
         valueInput.className = "value-input";
         valueInput.addEventListener("change", () => {
             card.value = Number(valueInput.value);
