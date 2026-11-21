@@ -414,7 +414,7 @@ function renderTransactionCardList(cards,containerId,direction){
         if (direction === "OUT") {
             valueInput.value = Math.round(card.value);
         } else {
-            valueInput.value = roundToCents(card.value);
+            valueInput.value = roundToCents(card.value).toFixed(2);
         }
         valueInput.className = "value-input";
         valueInput.addEventListener("change", () => {
